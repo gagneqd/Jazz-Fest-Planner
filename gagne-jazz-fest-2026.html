@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gagne Jazz Fest 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --purple: #6B2B8D; --gold: #D4AF37; --teal: #1B9AAA;
+            --orange: #F77F00; --dark: #1A1423; --light: #FFF8E7;
+            --green: #2A9D2F; --border: rgba(212, 175, 55, 0.3);
+        }
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: linear-gradient(135deg, var(--purple) 0%, #4A1C6A 50%, var(--dark) 100%);
+            color: var(--light); min-height: 100vh; padding: 20px;
+            max-width: 1600px; margin: 0 auto;
+        }
+        .header { text-align: center; margin-bottom: 20px; padding: 30px 20px 20px; position: relative; }
+        .header::before {
+            content: '🎺 🎷 🎺 🎷 🎺'; position: absolute; top: 20px;
+            left: 50%; transform: translateX(-50%); font-size: 24px;
+            opacity: 0.3; letter-spacing: 20px;
+        }
+        h1 {
+            font-family: 'Alfa Slab One', cursive;
+            font-size: clamp(2.5rem, 6vw, 4rem); color: var(--gold);
+            text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.3);
+            margin-bottom: 10px; letter-spacing: 3px; text-transform: uppercase;
+        }
+        .subheader { font-size: 1rem; font-weight: 600; margin-top: 10px; opacity: 0.9; }
+        .tabs {
+            display: flex; gap: 10px; margin-bottom: 25px;
+            justify-content: center; flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: rgba(0, 0, 0, 0.3); border: 2px solid var(--border);
+            color: var(--light); padding: 12px 28px; border-radius: 25px;
+            font-weight: 700; font-size: 0.95rem; cursor: pointer;
+            transition: all 0.3s ease; font-family: 'Nunito Sans', sans-serif;
+        }
+        .tab-btn:hover { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); }
+        .tab-btn.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .trip-info {
+            background: rgba(212, 175, 55, 0.15); border: 2px solid var(--gold);
+            border-radius: 15px; padding: 20px; margin-bottom: 25px;
+            text-align: center; backdrop-filter: blur(10px);
+        }
+        .trip-info-row {
+            display: flex; justify-content: center; gap: 30px;
+            flex-wrap: wrap; font-size: 0.95rem;
+        }
+        .trip-info-row span { display: flex; align-items: center; gap: 6px; }
+        .legend {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border);
+            border-radius: 15px; padding: 20px; margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .legend h3 {
+            font-size: 0.875rem; font-weight: 700; color: var(--gold);
+            margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .legend-items { display: flex; gap: 20px; flex-wrap: wrap; }
+        .legend-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.875rem; font-weight: 600;
+        }
+        .legend-badge { width: 12px; height: 12px; border-radius: 2px; }
+        .legend-badge.tickets { background: var(--green); }
+        .legend-badge.planning { background: var(--orange); }
+        .legend-badge.none { background: rgba(255, 255, 255, 0.3); }
+        .controls {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border);
+            border-radius: 15px; padding: 20px; margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .search-bar {
+            width: 100%; background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 12px 16px; color: var(--light);
+            font-family: 'Nunito Sans', sans-serif; font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        .search-bar:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+        .filters { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border);
+            color: var(--light); padding: 8px 16px; border-radius: 20px;
+            font-family: 'Nunito Sans', sans-serif; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease;
+        }
+        .filter-btn:hover { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); }
+        .filter-btn.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+        .add-show-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            background: var(--gold); color: var(--dark); border: none;
+            border-radius: 50px; padding: 16px 28px;
+            font-family: 'Nunito Sans', sans-serif; font-weight: 700;
+            font-size: 0.95rem; cursor: pointer;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.5);
+            transition: all 0.3s ease; display: flex;
+            align-items: center; gap: 8px; z-index: 100;
+        }
+        .add-show-btn:hover {
+            background: var(--orange); transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(247, 127, 0, 0.6);
+        }
+        .add-activity-btn {
+            position: fixed; bottom: 90px; right: 30px;
+            background: var(--teal); color: white; border: none;
+            border-radius: 50px; padding: 16px 28px;
+            font-family: 'Nunito Sans', sans-serif; font-weight: 700;
+            font-size: 0.95rem; cursor: pointer;
+            box-shadow: 0 8px 24px rgba(27, 154, 170, 0.5);
+            transition: all 0.3s ease; display: flex;
+            align-items: center; gap: 8px; z-index: 100;
+        }
+        .add-activity-btn:hover {
+            background: #157a87; transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(27, 154, 170, 0.7);
+        }
+        .day-section, .venue-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-left: 5px solid var(--gold); border-radius: 15px;
+            padding: 25px; margin-bottom: 25px; backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .venue-section { border-left-color: var(--teal); }
+        .day-header, .venue-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 12px;
+            border-bottom: 2px dotted var(--border);
+        }
+        .day-title { font-size: 1.8rem; font-weight: 800; color: var(--gold); }
+        .venue-name { font-size: 1.5rem; font-weight: 800; color: var(--teal); }
+        .day-subtitle, .venue-address {
+            font-size: 0.875rem; color: rgba(255, 248, 231, 0.7);
+            font-weight: 600; margin-top: 2px;
+        }
+        .section-title {
+            font-size: 1rem; font-weight: 700; color: var(--teal);
+            margin: 20px 0 12px 0; text-transform: uppercase;
+            letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;
+        }
+        .section-title:first-child { margin-top: 0; }
+        .cards-grid, .shows-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px; margin-bottom: 20px;
+        }
+        .card, .show-card {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px; padding: 16px; cursor: pointer;
+            transition: all 0.3s ease; position: relative;
+            border-left: 4px solid transparent;
+        }
+        .card:hover, .show-card:hover {
+            background: rgba(0, 0, 0, 0.5); border-color: var(--gold);
+            transform: translateX(5px);
+        }
+        .show-card:hover { transform: translateY(-2px); }
+        .card.has-tickets { border-left-color: var(--green); }
+        .card.planning { border-left-color: var(--orange); }
+        .show-card.in-planner {
+            border-left: 4px solid var(--green);
+            background: rgba(42, 157, 47, 0.1);
+        }
+        .card-header, .show-header {
+            display: flex; justify-content: space-between;
+            align-items: start; margin-bottom: 10px;
+        }
+        .card-name, .show-name {
+            font-weight: 700; font-size: 1.1rem;
+            color: var(--light); line-height: 1.3; flex: 1;
+        }
+        .show-name { font-size: 1.05rem; margin-right: 10px; }
+        .delete-btn {
+            background: none; border: none; color: rgba(255, 255, 255, 0.4);
+            cursor: pointer; padding: 4px 8px; font-size: 1.2rem;
+            line-height: 1; opacity: 0; transition: all 0.2s ease;
+            font-weight: 700;
+        }
+        .card:hover .delete-btn { opacity: 1; }
+        .delete-btn:hover { color: var(--orange); }
+        .add-btn {
+            background: var(--gold); color: var(--dark); border: none;
+            border-radius: 50%; width: 32px; height: 32px;
+            font-size: 1.2rem; font-weight: 700; cursor: pointer;
+            transition: all 0.3s ease; display: flex;
+            align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .add-btn:hover { background: var(--orange); transform: scale(1.1); }
+        .add-btn.added { background: var(--green); color: white; }
+        .card-details, .show-details {
+            font-size: 0.9rem; color: rgba(255, 248, 231, 0.8);
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .card-detail-row, .show-detail-row {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .time-group { display: flex; flex-direction: column; gap: 3px; }
+        .card-badge {
+            display: inline-block; padding: 4px 10px; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 700; margin-top: 10px;
+            text-transform: uppercase;
+        }
+        .card-badge.tickets { background: var(--green); color: white; }
+        .card-badge.planning { background: var(--orange); color: white; }
+        .show-day {
+            display: inline-block; background: rgba(27, 154, 170, 0.3);
+            color: var(--teal); padding: 4px 10px; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; margin-top: 8px;
+        }
+        .card-notes, .show-notes {
+            margin-top: 8px; font-size: 0.85rem;
+            color: rgba(255, 248, 231, 0.7);
+            font-style: italic; line-height: 1.4;
+        }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px); z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: linear-gradient(135deg, var(--purple) 0%, var(--dark) 100%);
+            border: 2px solid var(--gold); border-radius: 15px;
+            padding: 32px; max-width: 500px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            font-size: 2rem; font-weight: 800; color: var(--gold);
+            margin-bottom: 24px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block; margin-bottom: 8px; color: var(--light);
+            font-weight: 700; font-size: 0.875rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 12px; color: var(--light);
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 0.95rem; transition: all 0.2s ease;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+        .form-group select { cursor: pointer; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn-group { display: flex; gap: 12px; margin-top: 28px; }
+        .btn {
+            flex: 1; padding: 14px 20px; border: none;
+            border-radius: 8px; font-family: 'Nunito Sans', sans-serif;
+            font-weight: 700; font-size: 0.95rem; cursor: pointer;
+            transition: all 0.3s ease; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary { background: var(--gold); color: var(--dark); }
+        .btn-primary:hover { background: var(--orange); transform: translateY(-2px); }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1); color: var(--light);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+        .no-results {
+            text-align: center; padding: 40px;
+            color: rgba(255, 248, 231, 0.6); font-size: 1.1rem;
+        }
+        .footer {
+            text-align: center; margin-top: 40px; padding: 20px;
+            color: rgba(255, 248, 231, 0.5);
+            font-size: 0.9rem; font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            .add-show-btn {
+                bottom: 20px; right: 20px;
+                padding: 14px 22px; font-size: 0.9rem;
+            }
+            .add-activity-btn {
+                bottom: 80px; right: 20px;
+                padding: 14px 22px; font-size: 0.9rem;
+            }
+            .cards-grid, .shows-grid { grid-template-columns: 1fr; }
+            .day-title { font-size: 1.5rem; }
+            .venue-name { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Gagne Jazz Fest 2026</h1>
+        <div class="subheader">New Orleans Jazz & Heritage Festival</div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('planner')">📅 Your Planner</button>
+        <button class="tab-btn" onclick="switchTab('nighttime')">🎵 Nighttime Shows</button>
+        <button class="tab-btn" onclick="switchTab('jazzfest')">🎪 Jazz Fest</button>
+    </div>
+
+    <div id="planner-tab" class="tab-content active">
+        <div class="trip-info">
+            <div class="trip-info-row">
+                <span>📅 April 29 - May 5</span>
+                <span>🏨 Hotel Provincial</span>
+                <span>🎪 Festival: Apr 30 - May 3</span>
+            </div>
+        </div>
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-items">
+                <div class="legend-item"><div class="legend-badge tickets"></div><span>Have Tickets</span></div>
+                <div class="legend-item"><div class="legend-badge planning"></div><span>Planning to Go</span></div>
+                <div class="legend-item"><div class="legend-badge none"></div><span>No Tickets Yet</span></div>
+            </div>
+        </div>
+        <div id="schedule-container"></div>
+        <button class="add-activity-btn" onclick="openAddActivityModal()">🍴 Add Activity</button>
+        <button class="add-show-btn" onclick="openAddModal()">+ Add Show</button>
+    </div>
+
+    <div id="nighttime-tab" class="tab-content">
+        <div class="controls">
+            <input type="text" id="nighttime-search" class="search-bar" placeholder="Search by artist, venue, or description...">
+            <div class="filters" id="nighttime-filters"></div>
+        </div>
+        <div id="nighttime-container"></div>
+    </div>
+
+    <div id="jazzfest-tab" class="tab-content">
+        <div class="controls">
+            <input type="text" id="jazzfest-search" class="search-bar" placeholder="Search by artist name...">
+            <div class="filters" id="jazzfest-filters"></div>
+        </div>
+        <div id="jazzfest-container"></div>
+    </div>
+
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-title">Edit Event</div>
+            <div class="form-group"><label>Section</label>
+                <select id="edit-section">
+                    <option value="fest">Jazz Fest Highlights</option>
+                    <option value="evening">Evening Shows</option>
+                    <option value="postfest">Post-Fest Shows</option>
+                    <option value="latenight">Late Night Shows</option>
+                    <option value="other">Other (Restaurant/Activity)</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Name</label><input type="text" id="edit-name" placeholder="e.g., Wilco"></div>
+            <div class="form-group"><label>Day</label>
+                <select id="edit-day">
+                    <option value="wednesday">Wednesday, April 29</option>
+                    <option value="thursday">Thursday, April 30</option>
+                    <option value="friday">Friday, May 1</option>
+                    <option value="saturday">Saturday, May 2</option>
+                    <option value="sunday">Sunday, May 3</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Location/Venue</label><input type="text" id="edit-venue" placeholder="e.g., Saenger Theatre"></div>
+            <div class="form-group"><label>Door Time</label><input type="text" id="edit-door-time" placeholder="e.g., 8:00pm (optional)"></div>
+            <div class="form-group"><label>Show Time</label><input type="text" id="edit-show-time" placeholder="e.g., 9:00pm"></div>
+            <div class="form-group"><label>Ticket Status</label>
+                <select id="edit-ticket-status">
+                    <option value="none">No tickets yet</option>
+                    <option value="tickets">Have tickets</option>
+                    <option value="planning">Planning to go</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Notes</label><textarea id="edit-notes" placeholder="Add any notes, lineup details, or reminders..."></textarea></div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveEvent()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="add-from-library-modal">
+        <div class="modal-content">
+            <div class="modal-header">Add to Planner</div>
+            <div class="form-group"><label>Which day?</label>
+                <select id="library-day">
+                    <option value="wednesday">Wednesday, April 29</option>
+                    <option value="thursday">Thursday, April 30</option>
+                    <option value="friday">Friday, May 1</option>
+                    <option value="saturday">Saturday, May 2</option>
+                    <option value="sunday">Sunday, May 3</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Which section?</label>
+                <select id="library-section">
+                    <option value="fest">Jazz Fest Highlights</option>
+                    <option value="evening">Evening Shows</option>
+                    <option value="postfest">Post-Fest Shows</option>
+                    <option value="latenight">Late Night Shows</option>
+                    <option value="other">Other Activities</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="confirmLibraryAdd()">Add Show</button>
+                <button class="btn btn-secondary" onclick="closeLibraryModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">🎺 Let the good times roll! 🎷</div>
+
+    <script>
+// Default schedule data
+function getDefaultScheduleData() {
+    return {
+        wednesday: {
+            day: "Wednesday, April 29", subtitle: "Daze Between",
+            events: {
+                evening: [
+                    { id: 'wed-1', name: "Grahame Lesh & Friends", venue: "The Joy Theatre", doorTime: "", showTime: "7:30pm", ticketStatus: "none", notes: "ft. Ivan Neville, Jake Brownstein, Cory Henry" },
+                    { id: 'wed-2', name: "Daze Between Band", venue: "Tipitina's", doorTime: "", showTime: "10:00pm", ticketStatus: "none", notes: "Eric Krasno, George Porter Jr., Ivan Neville, Oteil Burbridge, Cory Henry, Tony Hall, Raymond Weber, Eric Bloom, Kanika Moore, Ryan Zoidis" }
+                ], postfest: [], latenight: [], other: []
+            }
+        },
+        thursday: {
+            day: "Thursday, April 30", subtitle: "Locals Thursday",
+            events: {
+                fest: [
+                    { id: 'thu-f1', name: "Widespread Panic", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'thu-f2', name: "Lake Street Dive", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'thu-f3', name: "Lettuce", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                ],
+                postfest: [{ id: 'thu-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", notes: "'An Evening With Wilco' - two full sets" }],
+                latenight: [{ id: 'thu-2', name: "Magoo", venue: "Chickie Wah Wah", doorTime: "12:30am", showTime: "1:00am", ticketStatus: "none", notes: "" }],
+                other: []
+            }
+        },
+        friday: {
+            day: "Friday, May 1", subtitle: "",
+            events: {
+                fest: [
+                    { id: 'fri-f1', name: "The Black Keys", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'fri-f2', name: "Ziggy Marley", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'fri-f3', name: "Rickie Lee Jones", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'fri-f4', name: "Lainey Wilson", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'fri-f5', name: "California Honeydrops", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                ],
+                postfest: [{ id: 'fri-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", notes: "'An Evening With Wilco' - two full sets" }],
+                latenight: [{ id: 'fri-2', name: "Neal Francis", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", notes: "w/ The Breaks (Eddie Roberts, Robert Walter, Stanton Moore)" }],
+                other: []
+            }
+        },
+        saturday: {
+            day: "Saturday, May 2", subtitle: "",
+            events: {
+                fest: [
+                    { id: 'sat-f1', name: "Eagles", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sat-f2', name: "Alabama Shakes", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sat-f3', name: "T-Pain", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sat-f4', name: "Dianne Reeves", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sat-f5', name: "Dumpstaphunk", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sat-f6', name: "Little Feat", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sat-f7', name: "Sierra Hull", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                ],
+                postfest: [
+                    { id: 'sat-1', name: "Anders Osborne Birthday Bash", venue: "Civic Theatre", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", notes: "With Dave Malone, Jackie Greene, Lindsay Lou, Rebirth Brass Band" },
+                    { id: 'sat-2', name: "Joe Russo's Almost Dead (JRAD)", venue: "Fillmore New Orleans", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", notes: "One night only. Joe Russo, Marco Benevento, Dave Dreiwitz, Tom Hamilton, Scott Metzger" }
+                ],
+                latenight: [{ id: 'sat-3', name: "FiyaPowa", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", notes: "Members of Dumpstaphunk & Galactic" }],
+                other: []
+            }
+        },
+        sunday: {
+            day: "Sunday, May 3", subtitle: "",
+            events: {
+                fest: [
+                    { id: 'sun-f1', name: "Tedeschi Trucks Band", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sun-f2', name: "Teddy Swims", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sun-f3', name: "Earth, Wind & Fire", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sun-f4', name: "Herbie Hancock", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sun-f5', name: "Trombone Shorty & Orleans Avenue", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
+                    { id: 'sun-f6', name: "Rebirth Brass Band", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                ],
+                postfest: [], latenight: [], other: []
+            }
+        }
+    };
+}
+
+const nighttimeLibrary = {
+    "Saenger Theatre": { address: "111 Canal St.", shows: [
+        { name: "Wilco", day: "thursday", doorTime: "", showTime: "9:00pm", notes: "Tickets from $60" },
+        { name: "Wilco", day: "friday", doorTime: "", showTime: "9:00pm", notes: "Tickets from $60" },
+        { name: "The Meters", day: "saturday", doorTime: "", showTime: "8:00pm", notes: "SOLD OUT" }
+    ]},
+    "Fillmore New Orleans": { address: "6 Canal St.", shows: [
+        { name: "Karl Denson's Tiny Universe", day: "thursday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Jimmy Cliff Celebration. Tickets from $51" },
+        { name: "Joe Russo's Almost Dead (JRAD)", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $81" },
+        { name: "Ari Lennox", day: "sunday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $75" }
+    ]},
+    "Civic Theatre": { address: "510 O'Keefe Ave.", shows: [
+        { name: "Daniel Donato's Cosmic NOLA", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets from $48" },
+        { name: "Anders Osborne's NOLA Birthday Bash", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $55" }
+    ]},
+    "Tipitina's": { address: "501 Napoleon Avenue", shows: [
+        { name: "The Iceman Special", day: "thursday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $34" },
+        { name: "Galactic", day: "friday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets $70" },
+        { name: "Neal Francis", day: "friday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $58" },
+        { name: "Neal Francis", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "w/ The Breaks. Tickets $58" },
+        { name: "FiyaPowa", day: "saturday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $42" },
+        { name: "Dumpstaphunk", day: "sunday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets $47" }
+    ]},
+    "Chickie Wah Wah": { address: "2828 Canal Street", shows: [
+        { name: "Jon Cleary", day: "thursday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Tickets from $45" },
+        { name: "Magoo", day: "thursday", doorTime: "12:30am", showTime: "1:00am", notes: "Tickets $27" },
+        { name: "Dan Penn & Spooner Oldham", day: "friday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Tickets from $57" },
+        { name: "Terence Blanchard", day: "saturday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Tickets from $64" }
+    ]},
+    "Republic New Orleans": { address: "828 South Peters St.", shows: [
+        { name: "Dead Feat", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets $63" },
+        { name: "Earth Wind & Power", day: "friday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets $59" },
+        { name: "STEELY DANth", day: "saturday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets $49" }
+    ]}
+};
+
+const jazzFestLibrary = {
+    "Thursday, April 30": ["Widespread Panic", "Lake Street Dive", "Lettuce", "Alejandro Escovedo", "Fred Wesley", "Sweet Crude", "Terrance Simien"],
+    "Friday, May 1": ["The Black Keys", "Ziggy Marley", "Rickie Lee Jones", "Lainey Wilson", "California Honeydrops", "Marc Broussard", "BeauSoleil", "Tab Benoit", "Bonerama", "Hot 8 Brass Band"],
+    "Saturday, May 2": ["Eagles", "Alabama Shakes", "T-Pain", "Dianne Reeves", "Big Freedia", "Dumpstaphunk", "Little Feat", "Sierra Hull", "Anders Osborne", "The Soul Rebels"],
+    "Sunday, May 3": ["Tedeschi Trucks Band", "Teddy Swims", "Earth, Wind & Fire", "Herbie Hancock", "Trombone Shorty", "Mavis Staples", "Galactic", "Rebirth Brass Band", "Jon Cleary"]
+};
+
+let scheduleData = getDefaultScheduleData();
+let editingEvent = null, isAddMode = false, selectedLibraryShow = null;
+let currentTab = 'planner', nighttimeFilter = 'all', nighttimeSearch = '';
+let jazzfestFilter = 'all', jazzfestSearch = '';
+
+function loadFromStorage() {
+    try {
+        const saved = localStorage.getItem('gagne-jazz-fest-2026-v3');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            scheduleData = getDefaultScheduleData();
+            Object.keys(parsed).forEach(dayKey => {
+                if (scheduleData[dayKey]) {
+                    Object.keys(parsed[dayKey].events).forEach(sectionKey => {
+                        if (parsed[dayKey].events[sectionKey] && Array.isArray(parsed[dayKey].events[sectionKey])) {
+                            scheduleData[dayKey].events[sectionKey] = parsed[dayKey].events[sectionKey];
+                        }
+                    });
+                }
+            });
+        }
+    } catch (error) { console.log('No saved data'); }
+}
+
+function saveToStorage() {
+    try { localStorage.setItem('gagne-jazz-fest-2026-v3', JSON.stringify(scheduleData)); }
+    catch (error) { console.error('Error saving:', error); }
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    if (tab === 'planner') {
+        document.querySelector('[onclick="switchTab(\'planner\')"]').classList.add('active');
+        document.getElementById('planner-tab').classList.add('active');
+        document.querySelector('.add-show-btn').style.display = 'flex';
+        document.querySelector('.add-activity-btn').style.display = 'flex';
+        renderSchedule();
+    } else if (tab === 'nighttime') {
+        document.querySelector('[onclick="switchTab(\'nighttime\')"]').classList.add('active');
+        document.getElementById('nighttime-tab').classList.add('active');
+        document.querySelector('.add-show-btn').style.display = 'none';
+        document.querySelector('.add-activity-btn').style.display = 'none';
+        renderNighttimeLibrary();
+    } else if (tab === 'jazzfest') {
+        document.querySelector('[onclick="switchTab(\'jazzfest\')"]').classList.add('active');
+        document.getElementById('jazzfest-tab').classList.add('active');
+        document.querySelector('.add-show-btn').style.display = 'none';
+        document.querySelector('.add-activity-btn').style.display = 'none';
+        renderJazzFestLibrary();
+    }
+}
+
+function isShowInPlanner(showName) {
+    for (const dayKey in scheduleData) {
+        for (const section in scheduleData[dayKey].events) {
+            if (scheduleData[dayKey].events[section].find(e => 
+                e.name.toLowerCase().includes(showName.toLowerCase()) ||
+                showName.toLowerCase().includes(e.name.toLowerCase())
+            )) return true;
+        }
+    }
+    return false;
+}
+
+function renderSchedule() {
+    const container = document.getElementById('schedule-container');
+    container.innerHTML = '';
+    Object.keys(scheduleData).forEach(dayKey => {
+        const day = scheduleData[dayKey];
+        const section = document.createElement('div');
+        section.className = 'day-section';
+        let html = `<div class="day-header"><div><div class="day-title">${day.day}</div>${day.subtitle ? `<div class="day-subtitle">${day.subtitle}</div>` : ''}</div></div>`;
+        const sectionConfig = {
+            evening: '🎵 Evening Shows', fest: '🎪 Jazz Fest Highlights',
+            postfest: '🎵 Post-Fest Shows', latenight: '🌙 Late Night Shows', other: '🍴 Other Activities'
+        };
+        ['evening', 'fest', 'postfest', 'latenight', 'other'].forEach(sectionKey => {
+            const events = day.events[sectionKey] || [];
+            if (events.length > 0) {
+                html += `<div class="section-title">${sectionConfig[sectionKey]}</div><div class="cards-grid">`;
+                events.forEach(event => html += renderCard(event, dayKey));
+                html += `</div>`;
+            }
+        });
+        section.innerHTML = html;
+        container.appendChild(section);
+    });
+}
+
+function renderCard(evt, dayKey) {
+    const statusClass = evt.ticketStatus === 'tickets' ? 'has-tickets' : evt.ticketStatus === 'planning' ? 'planning' : '';
+    let badge = evt.ticketStatus === 'tickets' ? '<span class="card-badge tickets">✓ Have Tickets</span>' : 
+                evt.ticketStatus === 'planning' ? '<span class="card-badge planning">Planning to Go</span>' : '';
+    let timeInfo = '';
+    if (evt.doorTime && evt.showTime) {
+        timeInfo = `<div class="time-group"><div class="card-detail-row">🚪 Doors: ${evt.doorTime}</div><div class="card-detail-row">🕐 Show: ${evt.showTime}</div></div>`;
+    } else if (evt.showTime) {
+        timeInfo = `<div class="card-detail-row">🕐 ${evt.showTime}</div>`;
+    }
+    return `<div class="card ${statusClass}" onclick="if(!event.target.classList.contains('delete-btn')) openEditModal('${dayKey}', '${evt.id}')">
+        <div class="card-header"><div class="card-name">${evt.name}</div>
+        <button class="delete-btn" data-day="${dayKey}" data-id="${evt.id}">×</button></div>
+        <div class="card-details">${evt.venue ? `<div class="card-detail-row">📍 ${evt.venue}</div>` : ''}${timeInfo}</div>
+        ${evt.notes ? `<div class="card-notes">${evt.notes}</div>` : ''}${badge}</div>`;
+}
+
+function renderNighttimeLibrary() {
+    const container = document.getElementById('nighttime-container');
+    const filtersContainer = document.getElementById('nighttime-filters');
+    if (filtersContainer.children.length === 0) {
+        ['all', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
+            const btn = document.createElement('button');
+            btn.className = `filter-btn ${day === 'all' ? 'active' : ''}`;
+            btn.textContent = day.charAt(0).toUpperCase() + day.slice(1);
+            btn.onclick = () => {
+                document.querySelectorAll('#nighttime-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                nighttimeFilter = day;
+                renderNighttimeLibrary();
+            };
+            filtersContainer.appendChild(btn);
+        });
+    }
+    container.innerHTML = '';
+    let hasResults = false;
+    Object.keys(nighttimeLibrary).forEach(venueName => {
+        const venue = nighttimeLibrary[venueName];
+        let filteredShows = venue.shows.filter(show => {
+            const matchesDay = nighttimeFilter === 'all' || show.day === nighttimeFilter;
+            const matchesSearch = !nighttimeSearch || show.name.toLowerCase().includes(nighttimeSearch) ||
+                venueName.toLowerCase().includes(nighttimeSearch) || (show.notes && show.notes.toLowerCase().includes(nighttimeSearch));
+            return matchesDay && matchesSearch;
+        });
+        if (filteredShows.length === 0) return;
+        hasResults = true;
+        const section = document.createElement('div');
+        section.className = 'venue-section';
+        let html = `<div class="venue-header"><div><div class="venue-name">${venueName}</div><div class="venue-address">${venue.address}</div></div></div><div class="shows-grid">`;
+        filteredShows.forEach((show, idx) => {
+            const inPlanner = isShowInPlanner(show.name);
+            let timeInfo = '';
+            if (show.doorTime && show.showTime) {
+                timeInfo = `<div class="time-group"><div class="show-detail-row">🚪 Doors: ${show.doorTime}</div><div class="show-detail-row">🕐 Show: ${show.showTime}</div></div>`;
+            } else if (show.showTime) {
+                timeInfo = `<div class="show-detail-row">🕐 ${show.showTime}</div>`;
+            }
+            html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}">
+                <div class="show-header"><div class="show-name">${show.name}</div>
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${venueName}', ${idx}, 'nighttime')">${inPlanner ? '✓' : '+'}</button></div>
+                <div class="show-details">${timeInfo}</div>${show.notes ? `<div class="show-notes">${show.notes}</div>` : ''}
+                <span class="show-day">${show.day}</span></div>`;
+        });
+        html += '</div>';
+        section.innerHTML = html;
+        container.appendChild(section);
+    });
+    if (!hasResults) container.innerHTML = '<div class="no-results">No shows found.</div>';
+}
+
+function renderJazzFestLibrary() {
+    const container = document.getElementById('jazzfest-container');
+    const filtersContainer = document.getElementById('jazzfest-filters');
+    if (filtersContainer.children.length === 0) {
+        ['all', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
+            const btn = document.createElement('button');
+            btn.className = `filter-btn ${day === 'all' ? 'active' : ''}`;
+            btn.textContent = day === 'all' ? 'All Days' : day.charAt(0).toUpperCase() + day.slice(1);
+            btn.onclick = () => {
+                document.querySelectorAll('#jazzfest-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                jazzfestFilter = day;
+                renderJazzFestLibrary();
+            };
+            filtersContainer.appendChild(btn);
+        });
+    }
+    container.innerHTML = '';
+    let hasResults = false;
+    Object.keys(jazzFestLibrary).forEach(dayName => {
+        const dayKey = dayName.toLowerCase().includes('thursday') ? 'thursday' :
+                      dayName.toLowerCase().includes('friday') ? 'friday' :
+                      dayName.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
+        if (jazzfestFilter !== 'all' && jazzfestFilter !== dayKey) return;
+        let artists = jazzFestLibrary[dayName];
+        if (jazzfestSearch) artists = artists.filter(a => a.toLowerCase().includes(jazzfestSearch));
+        if (artists.length === 0) return;
+        hasResults = true;
+        const section = document.createElement('div');
+        section.className = 'venue-section';
+        let html = `<div class="venue-header"><div><div class="venue-name">${dayName}</div><div class="venue-address">Fair Grounds</div></div></div><div class="shows-grid">`;
+        artists.forEach((artist, idx) => {
+            const inPlanner = isShowInPlanner(artist);
+            html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}">
+                <div class="show-header"><div class="show-name">${artist}</div>
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', ${idx}, 'jazzfest')">${inPlanner ? '✓' : '+'}</button></div>
+                <div class="show-details"><div class="show-detail-row">📍 Fair Grounds</div></div></div>`;
+        });
+        html += '</div>';
+        section.innerHTML = html;
+        container.appendChild(section);
+    });
+    if (!hasResults) container.innerHTML = '<div class="no-results">No artists found.</div>';
+}
+
+function openAddModal() {
+    isAddMode = true; editingEvent = null;
+    document.getElementById('modal-title').textContent = 'Add Show';
+    document.getElementById('edit-section').value = 'fest';
+    document.getElementById('edit-day').value = 'wednesday';
+    ['edit-name', 'edit-venue', 'edit-door-time', 'edit-show-time', 'edit-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('edit-ticket-status').value = 'none';
+    document.getElementById('edit-modal').classList.add('active');
+}
+
+function openAddActivityModal() {
+    isAddMode = true; editingEvent = null;
+    document.getElementById('modal-title').textContent = 'Add Activity';
+    document.getElementById('edit-section').value = 'other';
+    document.getElementById('edit-day').value = 'wednesday';
+    ['edit-name', 'edit-venue', 'edit-door-time', 'edit-show-time', 'edit-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('edit-ticket-status').value = 'none';
+    document.getElementById('edit-modal').classList.add('active');
+}
+
+function openEditModal(dayKey, eventId) {
+    isAddMode = false;
+    const day = scheduleData[dayKey];
+    let foundEvent = null, foundSection = null;
+    Object.keys(day.events).forEach(section => {
+        const evt = day.events[section].find(e => e.id === eventId);
+        if (evt) { foundEvent = evt; foundSection = section; }
+    });
+    if (!foundEvent) return;
+    editingEvent = { dayKey, eventId, section: foundSection };
+    document.getElementById('modal-title').textContent = 'Edit Event';
+    document.getElementById('edit-section').value = foundSection;
+    document.getElementById('edit-day').value = dayKey;
+    document.getElementById('edit-name').value = foundEvent.name;
+    document.getElementById('edit-venue').value = foundEvent.venue || '';
+    document.getElementById('edit-door-time').value = foundEvent.doorTime || '';
+    document.getElementById('edit-show-time').value = foundEvent.showTime || '';
+    document.getElementById('edit-ticket-status').value = foundEvent.ticketStatus || 'none';
+    document.getElementById('edit-notes').value = foundEvent.notes || '';
+    document.getElementById('edit-modal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('edit-modal').classList.remove('active');
+    editingEvent = null; isAddMode = false;
+}
+
+function saveEvent() {
+    const section = document.getElementById('edit-section').value;
+    const dayKey = document.getElementById('edit-day').value;
+    const name = document.getElementById('edit-name').value.trim();
+    if (!name) { alert('Please enter a name'); return; }
+    const eventData = {
+        id: isAddMode ? `${dayKey}-${Date.now()}` : editingEvent.eventId,
+        name, venue: document.getElementById('edit-venue').value.trim(),
+        doorTime: document.getElementById('edit-door-time').value.trim(),
+        showTime: document.getElementById('edit-show-time').value.trim(),
+        ticketStatus: document.getElementById('edit-ticket-status').value,
+        notes: document.getElementById('edit-notes').value.trim()
+    };
+    if (isAddMode) {
+        if (!scheduleData[dayKey].events[section]) scheduleData[dayKey].events[section] = [];
+        scheduleData[dayKey].events[section].push(eventData);
+    } else {
+        const oldDay = scheduleData[editingEvent.dayKey];
+        const oldIdx = oldDay.events[editingEvent.section].findIndex(e => e.id === editingEvent.eventId);
+        if (oldIdx !== -1) oldDay.events[editingEvent.section].splice(oldIdx, 1);
+        if (!scheduleData[dayKey].events[section]) scheduleData[dayKey].events[section] = [];
+        scheduleData[dayKey].events[section].push(eventData);
+    }
+    saveToStorage();
+    renderSchedule();
+    closeModal();
+}
+
+function deleteEvent(dayKey, eventId) {
+    console.log('DELETE FUNCTION CALLED:', dayKey, eventId);
+    // Removed confirmation - delete immediately
+    Object.keys(scheduleData[dayKey].events).forEach(section => {
+        const idx = scheduleData[dayKey].events[section].findIndex(evt => evt.id === eventId);
+        if (idx !== -1) {
+            console.log('Found event in section:', section, 'at index:', idx);
+            scheduleData[dayKey].events[section].splice(idx, 1);
+        }
+    });
+    saveToStorage();
+    console.log('Rendering schedule after delete');
+    renderSchedule();
+}
+
+// Add event delegation for delete buttons with capturing
+console.log('Setting up delete button event listener');
+document.addEventListener('click', function(e) {
+    console.log('Document click:', e.target.tagName, e.target.className);
+    if (e.target && e.target.classList && e.target.classList.contains('delete-btn')) {
+        console.log('DELETE BUTTON CLICKED!');
+        e.stopPropagation();
+        e.preventDefault();
+        const dayKey = e.target.getAttribute('data-day');
+        const eventId = e.target.getAttribute('data-id');
+        console.log('Day:', dayKey, 'ID:', eventId);
+        if (dayKey && eventId) {
+            deleteEvent(dayKey, eventId);
+        } else {
+            console.log('Missing data attributes!');
+        }
+    }
+}, true);
+
+function openLibraryAddModal(source, index, type) {
+    let show;
+    if (type === 'nighttime') {
+        const venue = nighttimeLibrary[source];
+        show = venue.shows[index];
+        if (isShowInPlanner(show.name)) return;
+        selectedLibraryShow = {
+            name: show.name, venue: `${source} (${venue.address})`,
+            doorTime: show.doorTime, showTime: show.showTime,
+            notes: show.notes, suggestedDay: show.day
+        };
+        document.getElementById('library-day').value = show.day;
+        document.getElementById('library-section').value = (show.showTime && (show.showTime.includes('am') || parseInt(show.showTime) >= 12)) ? 'latenight' : 'postfest';
+    } else {
+        const artists = jazzFestLibrary[source];
+        const artist = artists[index];
+        if (isShowInPlanner(artist)) return;
+        const dayKey = source.toLowerCase().includes('thursday') ? 'thursday' :
+                      source.toLowerCase().includes('friday') ? 'friday' :
+                      source.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
+        selectedLibraryShow = { name: artist, venue: "Fair Grounds", doorTime: "", showTime: "", notes: "", suggestedDay: dayKey };
+        document.getElementById('library-day').value = dayKey;
+        document.getElementById('library-section').value = 'fest';
+    }
+    document.getElementById('add-from-library-modal').classList.add('active');
+}
+
+function closeLibraryModal() {
+    document.getElementById('add-from-library-modal').classList.remove('active');
+    selectedLibraryShow = null;
+}
+
+function confirmLibraryAdd() {
+    if (!selectedLibraryShow) return;
+    const day = document.getElementById('library-day').value;
+    const section = document.getElementById('library-section').value;
+    const newEvent = {
+        id: `${day}-${Date.now()}`, name: selectedLibraryShow.name,
+        venue: selectedLibraryShow.venue, doorTime: selectedLibraryShow.doorTime,
+        showTime: selectedLibraryShow.showTime, ticketStatus: 'none',
+        notes: selectedLibraryShow.notes
+    };
+    if (!scheduleData[day].events[section]) scheduleData[day].events[section] = [];
+    scheduleData[day].events[section].push(newEvent);
+    saveToStorage();
+    closeLibraryModal();
+    if (currentTab === 'nighttime') renderNighttimeLibrary();
+    else if (currentTab === 'jazzfest') renderJazzFestLibrary();
+}
+
+document.getElementById('edit-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-modal')) closeModal(); });
+document.getElementById('add-from-library-modal').addEventListener('click', e => { if (e.target === document.getElementById('add-from-library-modal')) closeLibraryModal(); });
+document.getElementById('nighttime-search').addEventListener('input', e => { nighttimeSearch = e.target.value.toLowerCase(); renderNighttimeLibrary(); });
+document.getElementById('jazzfest-search').addEventListener('input', e => { jazzfestSearch = e.target.value.toLowerCase(); renderJazzFestLibrary(); });
+
+function init() { loadFromStorage(); renderSchedule(); }
+init();
+    </script>
+</body>
+</html>
