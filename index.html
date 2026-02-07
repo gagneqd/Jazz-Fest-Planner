@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { overflow-x: hidden; }
         :root {
             /* New Orleans Jazz Heritage Palette */
             --jazz-red: #D84A3C;
@@ -47,6 +48,7 @@
             max-width: 1600px;
             margin: 0 auto;
             position: relative;
+            overflow-x: hidden;
         }
         /* Remove the dark overlay - we want vibrant colors! */
         body::before {
@@ -70,6 +72,8 @@
             line-height: 0.8;
             opacity: 1;
             animation: fadeDown 1s ease-out;
+            max-width: 100%;
+            overflow: hidden;
         }
         @keyframes fadeDown {
             from {
@@ -174,7 +178,7 @@
         }
         .legend-badge { width: 12px; height: 12px; border-radius: 2px; }
         .legend-badge.tickets { background: var(--vintage-teal); }
-        .legend-badge.planning { background: var(--orange); }
+        .legend-badge.planning { background: var(--golden-orange); }
         .legend-badge.none { background: rgba(255, 255, 255, 0.3); }
         .controls {
             background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border);
@@ -432,6 +436,32 @@
             font-size: 1.05rem;
         }
         @media (max-width: 768px) {
+            /* Prevent horizontal scroll on mobile */
+            body {
+                padding: 15px;
+                overflow-x: hidden;
+            }
+            
+            /* Optimize header for mobile */
+            .header {
+                padding: 40px 15px 25px;
+                overflow: hidden;
+            }
+            .header-main-text {
+                font-size: clamp(2.5rem, 12vw, 4rem);
+                letter-spacing: 0.05em;
+            }
+            .header-subtitle {
+                font-size: 0.75rem;
+                letter-spacing: 0.08em;
+            }
+            
+            /* Make watermark smaller on mobile to prevent overflow */
+            .year-watermark {
+                font-size: clamp(8rem, 25vw, 15rem);
+                letter-spacing: 0.05em;
+            }
+            
             .card.size-large {
                 grid-column: span 1;
             }
