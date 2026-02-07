@@ -330,9 +330,13 @@
                 bottom: 80px; right: 20px;
                 padding: 14px 22px; font-size: 0.9rem;
             }
+            
+            /* Flexbox layout for pills */
             .cards-grid { 
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
-                gap: 8px !important;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+                margin-bottom: 15px !important;
             }
             .shows-grid {
                 grid-template-columns: 1fr;
@@ -341,71 +345,136 @@
             .show-card.tier1 {
                 grid-column: span 1;
             }
-            .day-title { font-size: 1.5rem; }
+            .day-title { font-size: 1.4rem; }
             .venue-name { font-size: 1.2rem; }
             
-            /* Compact day sections on mobile */
+            /* Compact day sections */
             .day-section, .venue-section {
-                padding: 16px !important;
-                margin-bottom: 16px !important;
-            }
-            .day-header, .venue-header {
+                padding: 12px !important;
                 margin-bottom: 12px !important;
             }
+            .day-header, .venue-header {
+                margin-bottom: 8px !important;
+            }
             .section-title {
-                font-size: 0.9rem !important;
-                margin: 12px 0 8px 0 !important;
+                font-size: 0.8rem !important;
+                margin: 8px 0 6px 0 !important;
             }
             
-            /* AGGRESSIVE mobile compact mode for ALL planner cards */
-            .card, .card.size-large, .card.size-medium, .card.size-small {
-                padding: 10px !important;
-                margin-bottom: 0 !important;
-                border-radius: 8px !important;
+            /* PILL/TAG STYLE */
+            .card {
+                position: relative !important;
+                border-radius: 16px !important;
+                padding: 6px 10px !important;
+                border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+                background: rgba(0, 0, 0, 0.35) !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 5px !important;
+                min-height: 28px !important;
             }
-            /* Large cards = span 2 columns on mobile (half screen) */
+            
+            .card:active {
+                transform: scale(0.96) !important;
+                background: rgba(0, 0, 0, 0.5) !important;
+            }
+            
+            /* Pill sizes */
             .card.size-large {
-                grid-column: span 2 !important;
+                flex: 0 1 calc(50% - 3px) !important;
             }
-            /* Medium cards = span 2 columns (same as large on mobile for now) */
             .card.size-medium {
-                grid-column: span 2 !important;
+                flex: 0 1 calc(33.33% - 4px) !important;
             }
-            /* Small cards = span 1 column (fits 2-3 per row) */
             .card.size-small {
-                grid-column: span 1 !important;
+                flex: 0 1 calc(25% - 4.5px) !important;
             }
-            .card-name, 
-            .card.size-large .card-name,
-            .card.size-medium .card-name,
-            .card.size-small .card-name {
-                font-size: 0.9rem !important;
-                line-height: 1.2 !important;
-                margin-bottom: 6px !important;
+            
+            /* Status colors */
+            .card.has-tickets {
+                border-color: var(--green) !important;
+                background: rgba(42, 157, 47, 0.2) !important;
             }
-            .card-details {
-                font-size: 0.75rem !important;
+            .card.planning {
+                border-color: var(--orange) !important;
+                background: rgba(247, 127, 0, 0.2) !important;
+            }
+            
+            /* Compact header */
+            .card-header {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                margin: 0 !important;
                 gap: 3px !important;
             }
-            .card-detail-row {
-                font-size: 0.75rem !important;
-            }
-            .time-group {
-                gap: 2px !important;
-            }
-            .card-badge {
-                font-size: 0.65rem !important;
-                padding: 2px 6px !important;
-                margin-top: 4px !important;
-            }
-            .card-notes {
+            
+            /* Name only - truncate */
+            .card-name {
                 font-size: 0.7rem !important;
-                margin-top: 4px !important;
-                line-height: 1.3 !important;
+                font-weight: 600 !important;
+                line-height: 1.1 !important;
+                margin: 0 !important;
+                flex: 1 !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
             }
+            
+            .card.size-large .card-name {
+                font-size: 0.8rem !important;
+                font-weight: 700 !important;
+            }
+            .card.size-medium .card-name {
+                font-size: 0.72rem !important;
+            }
+            .card.size-small .card-name {
+                font-size: 0.65rem !important;
+            }
+            
+            /* Hide everything except name on mobile */
+            .card-details,
+            .card-notes,
+            .card-badge {
+                display: none !important;
+            }
+            
+            /* Status dot indicator */
+            .card.has-tickets::before,
+            .card.planning::before {
+                content: '' !important;
+                width: 5px !important;
+                height: 5px !important;
+                border-radius: 50% !important;
+                flex-shrink: 0 !important;
+            }
+            .card.has-tickets::before {
+                background: var(--green) !important;
+            }
+            .card.planning::before {
+                background: var(--orange) !important;
+            }
+            
+            /* Tiny X button */
             .delete-btn {
-                font-size: 1rem !important;
-                padding: 2px 6px !important;
+                display: none !important;
+                font-size: 0.8rem !important;
+                padding: 0 !important;
+                opacity: 1 !important;
+                background: rgba(255, 255, 255, 0.15) !important;
+                border-radius: 50% !important;
+                width: 16px !important;
+                height: 16px !important;
+                line-height: 16px !important;
+                text-align: center !important;
+                flex-shrink: 0 !important;
+            }
+            .card:active .delete-btn {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
         }
     </style>
