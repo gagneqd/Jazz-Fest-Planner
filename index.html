@@ -330,7 +330,11 @@
                 bottom: 80px; right: 20px;
                 padding: 14px 22px; font-size: 0.9rem;
             }
-            .cards-grid, .shows-grid { 
+            .cards-grid { 
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+                gap: 8px !important;
+            }
+            .shows-grid {
                 grid-template-columns: 1fr;
                 gap: 8px !important;
             }
@@ -359,23 +363,32 @@
                 margin-bottom: 0 !important;
                 border-radius: 8px !important;
             }
+            /* Large cards = span 2 columns on mobile (half screen) */
             .card.size-large {
+                grid-column: span 2 !important;
+            }
+            /* Medium cards = span 2 columns (same as large on mobile for now) */
+            .card.size-medium {
+                grid-column: span 2 !important;
+            }
+            /* Small cards = span 1 column (fits 2-3 per row) */
+            .card.size-small {
                 grid-column: span 1 !important;
             }
             .card-name, 
             .card.size-large .card-name,
             .card.size-medium .card-name,
             .card.size-small .card-name {
-                font-size: 0.95rem !important;
+                font-size: 0.9rem !important;
                 line-height: 1.2 !important;
                 margin-bottom: 6px !important;
             }
             .card-details {
-                font-size: 0.8rem !important;
-                gap: 4px !important;
+                font-size: 0.75rem !important;
+                gap: 3px !important;
             }
             .card-detail-row {
-                font-size: 0.8rem !important;
+                font-size: 0.75rem !important;
             }
             .time-group {
                 gap: 2px !important;
@@ -383,11 +396,11 @@
             .card-badge {
                 font-size: 0.65rem !important;
                 padding: 2px 6px !important;
-                margin-top: 6px !important;
+                margin-top: 4px !important;
             }
             .card-notes {
-                font-size: 0.75rem !important;
-                margin-top: 6px !important;
+                font-size: 0.7rem !important;
+                margin-top: 4px !important;
                 line-height: 1.3 !important;
             }
             .delete-btn {
@@ -912,7 +925,7 @@ function renderJazzFestLibrary() {
             const tierClass = artistData.searchResult ? 'tier1' : artistData.tier;
             html += `<div class="show-card ${tierClass} ${inPlanner ? 'in-planner' : ''}">
                 <div class="show-header"><div class="show-name">${artistData.name}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest')">${inPlanner ? '✓' : '+'}</button></div>
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')">${inPlanner ? '✓' : '+'}</button></div>
                 <div class="show-details"><div class="show-detail-row">📍 Fair Grounds</div></div></div>`;
         });
         
@@ -1036,7 +1049,7 @@ document.addEventListener('click', function(e) {
     }
 }, true);
 
-function openLibraryAddModal(source, indexOrName, type) {
+function openLibraryAddModal(source, indexOrName, type, tier) {
     let show;
     if (type === 'nighttime') {
         const venue = nighttimeLibrary[source];
@@ -1045,7 +1058,7 @@ function openLibraryAddModal(source, indexOrName, type) {
         selectedLibraryShow = {
             name: show.name, venue: `${source} (${venue.address})`,
             doorTime: show.doorTime, showTime: show.showTime,
-            notes: show.notes, suggestedDay: show.day
+            notes: show.notes, suggestedDay: show.day, cardSize: 'medium'
         };
         document.getElementById('library-day').value = show.day;
         document.getElementById('library-section').value = (show.showTime && (show.showTime.includes('am') || parseInt(show.showTime) >= 12)) ? 'latenight' : 'postfest';
@@ -1055,7 +1068,9 @@ function openLibraryAddModal(source, indexOrName, type) {
         const dayKey = source.toLowerCase().includes('thursday') ? 'thursday' :
                       source.toLowerCase().includes('friday') ? 'friday' :
                       source.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
-        selectedLibraryShow = { name: artist, venue: "Fair Grounds", doorTime: "", showTime: "", notes: "", suggestedDay: dayKey };
+        // Map tier to card size: tier1 -> large, tier2 -> medium, tier3 -> small
+        const cardSize = tier === 'tier1' ? 'large' : tier === 'tier2' ? 'medium' : 'small';
+        selectedLibraryShow = { name: artist, venue: "Fair Grounds", doorTime: "", showTime: "", notes: "", suggestedDay: dayKey, cardSize: cardSize };
         document.getElementById('library-day').value = dayKey;
         document.getElementById('library-section').value = 'fest';
     }
@@ -1075,6 +1090,7 @@ function confirmLibraryAdd() {
         id: `${day}-${Date.now()}`, name: selectedLibraryShow.name,
         venue: selectedLibraryShow.venue, doorTime: selectedLibraryShow.doorTime,
         showTime: selectedLibraryShow.showTime, ticketStatus: 'none',
+        cardSize: selectedLibraryShow.cardSize || 'medium',
         notes: selectedLibraryShow.notes
     };
     if (!scheduleData[day].events[section]) scheduleData[day].events[section] = [];
