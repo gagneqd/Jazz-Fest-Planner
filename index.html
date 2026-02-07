@@ -154,6 +154,55 @@
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 12px; margin-bottom: 20px;
         }
+        /* Jazz Fest Library Pills */
+        .jazzfest-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .show-card-jazzfest {
+            display: inline-flex !important;
+            align-items: center;
+            border-radius: 20px;
+            padding: 8px 14px;
+            min-height: 36px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .show-card-jazzfest.tier1 {
+            flex: 0 1 calc(50% - 4px);
+        }
+        .show-card-jazzfest.tier2 {
+            flex: 0 1 calc(33.33% - 5.33px);
+        }
+        .show-card-jazzfest.tier3 {
+            flex: 0 1 calc(25% - 6px);
+        }
+        .show-card-jazzfest .show-header {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .show-card-jazzfest .show-name {
+            font-size: 0.85rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .show-card-jazzfest.tier1 .show-name {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .show-card-jazzfest.tier2 .show-name {
+            font-size: 0.9rem;
+        }
+        .show-card-jazzfest.tier3 .show-name {
+            font-size: 0.8rem;
+        }
+        .show-card-jazzfest .add-btn {
+            margin-left: auto;
+        }
         .card {
             background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px; padding: 16px; cursor: pointer;
@@ -331,17 +380,67 @@
                 padding: 14px 22px; font-size: 0.9rem;
             }
             
-            /* Flexbox layout for pills */
-            .cards-grid { 
+            /* Jazz Fest: Flexbox for pills */
+            .cards-grid.section-fest { 
                 display: flex !important;
                 flex-wrap: wrap !important;
                 gap: 6px !important;
                 margin-bottom: 15px !important;
             }
+            
+            /* Other sections: Grid for info cards */
+            .cards-grid.section-evening,
+            .cards-grid.section-postfest,
+            .cards-grid.section-latenight,
+            .cards-grid.section-other {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+                gap: 8px !important;
+            }
+            
             .shows-grid {
                 grid-template-columns: 1fr;
                 gap: 8px !important;
             }
+            
+            /* Jazz Fest Library Pills on mobile */
+            .jazzfest-pills {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+            }
+            .show-card-jazzfest {
+                padding: 6px 10px !important;
+                min-height: 28px !important;
+                border-radius: 16px !important;
+            }
+            .show-card-jazzfest.tier1 {
+                flex: 0 1 calc(50% - 3px) !important;
+            }
+            .show-card-jazzfest.tier2 {
+                flex: 0 1 calc(33.33% - 4px) !important;
+            }
+            .show-card-jazzfest.tier3 {
+                flex: 0 1 calc(25% - 4.5px) !important;
+            }
+            .show-card-jazzfest .show-name {
+                font-size: 0.7rem !important;
+            }
+            .show-card-jazzfest.tier1 .show-name {
+                font-size: 0.8rem !important;
+            }
+            .show-card-jazzfest.tier2 .show-name {
+                font-size: 0.72rem !important;
+            }
+            .show-card-jazzfest.tier3 .show-name {
+                font-size: 0.65rem !important;
+            }
+            .show-card-jazzfest .add-btn {
+                width: 24px !important;
+                height: 24px !important;
+                font-size: 1rem !important;
+            }
+            
             .show-card.tier1 {
                 grid-column: span 1;
             }
@@ -361,8 +460,8 @@
                 margin: 8px 0 6px 0 !important;
             }
             
-            /* PILL/TAG STYLE */
-            .card {
+            /* JAZZ FEST PILLS (fest section only) */
+            .card.card-fest {
                 position: relative !important;
                 border-radius: 16px !important;
                 padding: 6px 10px !important;
@@ -376,34 +475,41 @@
                 min-height: 28px !important;
             }
             
-            .card:active {
+            .card.card-fest:active {
                 transform: scale(0.96) !important;
                 background: rgba(0, 0, 0, 0.5) !important;
             }
             
-            /* Pill sizes */
-            .card.size-large {
+            /* Pill sizes for fest */
+            .card.card-fest.size-large {
                 flex: 0 1 calc(50% - 3px) !important;
             }
-            .card.size-medium {
+            .card.card-fest.size-medium {
                 flex: 0 1 calc(33.33% - 4px) !important;
             }
-            .card.size-small {
+            .card.card-fest.size-small {
                 flex: 0 1 calc(25% - 4.5px) !important;
             }
             
-            /* Status colors */
-            .card.has-tickets {
+            /* Status colors for pills */
+            .card.card-fest.has-tickets {
                 border-color: var(--green) !important;
                 background: rgba(42, 157, 47, 0.2) !important;
             }
-            .card.planning {
+            .card.card-fest.planning {
                 border-color: var(--orange) !important;
                 background: rgba(247, 127, 0, 0.2) !important;
             }
             
-            /* Compact header */
-            .card-header {
+            /* Hide details in pills */
+            .card.card-fest .card-details,
+            .card.card-fest .card-notes,
+            .card.card-fest .card-badge {
+                display: none !important;
+            }
+            
+            /* Pill header */
+            .card.card-fest .card-header {
                 display: flex !important;
                 align-items: center !important;
                 width: 100% !important;
@@ -411,8 +517,8 @@
                 gap: 3px !important;
             }
             
-            /* Name only - truncate */
-            .card-name {
+            /* Pill name */
+            .card.card-fest .card-name {
                 font-size: 0.7rem !important;
                 font-weight: 600 !important;
                 line-height: 1.1 !important;
@@ -423,41 +529,78 @@
                 white-space: nowrap !important;
             }
             
-            .card.size-large .card-name {
+            .card.card-fest.size-large .card-name {
                 font-size: 0.8rem !important;
                 font-weight: 700 !important;
             }
-            .card.size-medium .card-name {
+            .card.card-fest.size-medium .card-name {
                 font-size: 0.72rem !important;
             }
-            .card.size-small .card-name {
+            .card.card-fest.size-small .card-name {
                 font-size: 0.65rem !important;
             }
             
-            /* Hide everything except name on mobile */
-            .card-details,
-            .card-notes,
-            .card-badge {
-                display: none !important;
-            }
-            
-            /* Status dot indicator */
-            .card.has-tickets::before,
-            .card.planning::before {
+            /* Status dot for pills */
+            .card.card-fest.has-tickets::before,
+            .card.card-fest.planning::before {
                 content: '' !important;
                 width: 5px !important;
                 height: 5px !important;
                 border-radius: 50% !important;
                 flex-shrink: 0 !important;
             }
-            .card.has-tickets::before {
+            .card.card-fest.has-tickets::before {
                 background: var(--green) !important;
             }
-            .card.planning::before {
+            .card.card-fest.planning::before {
                 background: var(--orange) !important;
             }
             
-            /* Tiny X button */
+            /* OTHER SECTIONS: Compact info cards */
+            .card.card-evening,
+            .card.card-postfest,
+            .card.card-latenight,
+            .card.card-other {
+                padding: 8px !important;
+                border-radius: 8px !important;
+            }
+            
+            .card.card-evening .card-name,
+            .card.card-postfest .card-name,
+            .card.card-latenight .card-name,
+            .card.card-other .card-name {
+                font-size: 0.85rem !important;
+                line-height: 1.2 !important;
+                margin-bottom: 4px !important;
+            }
+            
+            .card.card-evening .card-details,
+            .card.card-postfest .card-details,
+            .card.card-latenight .card-details,
+            .card.card-other .card-details {
+                font-size: 0.72rem !important;
+                gap: 2px !important;
+            }
+            
+            .card.card-evening .card-notes,
+            .card.card-postfest .card-notes,
+            .card.card-latenight .card-notes,
+            .card.card-other .card-notes {
+                font-size: 0.7rem !important;
+                margin-top: 4px !important;
+                line-height: 1.3 !important;
+            }
+            
+            .card.card-evening .card-badge,
+            .card.card-postfest .card-badge,
+            .card.card-latenight .card-badge,
+            .card.card-other .card-badge {
+                font-size: 0.65rem !important;
+                padding: 2px 6px !important;
+                margin-top: 4px !important;
+            }
+            
+            /* Delete button */
             .delete-btn {
                 display: none !important;
                 font-size: 0.8rem !important;
@@ -858,8 +1001,8 @@ function renderSchedule() {
         ['evening', 'fest', 'postfest', 'latenight', 'other'].forEach(sectionKey => {
             const events = day.events[sectionKey] || [];
             if (events.length > 0) {
-                html += `<div class="section-title">${sectionConfig[sectionKey]}</div><div class="cards-grid">`;
-                events.forEach(event => html += renderCard(event, dayKey));
+                html += `<div class="section-title">${sectionConfig[sectionKey]}</div><div class="cards-grid section-${sectionKey}">`;
+                events.forEach(event => html += renderCard(event, dayKey, sectionKey));
                 html += `</div>`;
             }
         });
@@ -868,9 +1011,10 @@ function renderSchedule() {
     });
 }
 
-function renderCard(evt, dayKey) {
+function renderCard(evt, dayKey, sectionKey) {
     const statusClass = evt.ticketStatus === 'tickets' ? 'has-tickets' : evt.ticketStatus === 'planning' ? 'planning' : '';
     const sizeClass = evt.cardSize ? `size-${evt.cardSize}` : 'size-medium';
+    const sectionClass = sectionKey ? `card-${sectionKey}` : '';
     let badge = evt.ticketStatus === 'tickets' ? '<span class="card-badge tickets">✓ Have Tickets</span>' : 
                 evt.ticketStatus === 'planning' ? '<span class="card-badge planning">Planning to Go</span>' : '';
     let timeInfo = '';
@@ -879,7 +1023,7 @@ function renderCard(evt, dayKey) {
     } else if (evt.showTime) {
         timeInfo = `<div class="card-detail-row">🕐 ${evt.showTime}</div>`;
     }
-    return `<div class="card ${statusClass} ${sizeClass}" onclick="if(!event.target.classList.contains('delete-btn')) openEditModal('${dayKey}', '${evt.id}')">
+    return `<div class="card ${statusClass} ${sizeClass} ${sectionClass}" onclick="if(!event.target.classList.contains('delete-btn')) openEditModal('${dayKey}', '${evt.id}')">
         <div class="card-header"><div class="card-name">${evt.name}</div>
         <button class="delete-btn" data-day="${dayKey}" data-id="${evt.id}">×</button></div>
         <div class="card-details">${evt.venue ? `<div class="card-detail-row">📍 ${evt.venue}</div>` : ''}${timeInfo}</div>
@@ -987,15 +1131,14 @@ function renderJazzFestLibrary() {
         hasResults = true;
         const section = document.createElement('div');
         section.className = 'venue-section';
-        let html = `<div class="venue-header"><div><div class="venue-name">${dayName}</div><div class="venue-address">Fair Grounds</div></div></div><div class="shows-grid">`;
+        let html = `<div class="venue-header"><div><div class="venue-name">${dayName}</div><div class="venue-address">Fair Grounds</div></div></div><div class="jazzfest-pills">`;
         
         allArtists.forEach((artistData, idx) => {
             const inPlanner = isShowInPlanner(artistData.name);
             const tierClass = artistData.searchResult ? 'tier1' : artistData.tier;
-            html += `<div class="show-card ${tierClass} ${inPlanner ? 'in-planner' : ''}">
+            html += `<div class="show-card show-card-jazzfest ${tierClass} ${inPlanner ? 'in-planner' : ''}">
                 <div class="show-header"><div class="show-name">${artistData.name}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')">${inPlanner ? '✓' : '+'}</button></div>
-                <div class="show-details"><div class="show-detail-row">📍 Fair Grounds</div></div></div>`;
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')">${inPlanner ? '✓' : '+'}</button></div></div>`;
         });
         
         html += '</div>';
