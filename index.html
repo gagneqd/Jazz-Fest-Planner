@@ -347,11 +347,20 @@
             font-size: 1rem;
             font-weight: 700;
             color: var(--golden-orange);
-            margin: 20px 0 12px 0;
+            margin: 24px 0 14px 0;
             letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background: var(--golden-orange);
         }
         .section-title:first-child { margin-top: 0; }
         .cards-grid, .shows-grid {
@@ -487,8 +496,16 @@
             -webkit-backdrop-filter: blur(15px) saturate(200%);
             border-color: var(--warm-orange);
             transform: translateX(5px);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
-        .show-card:hover { transform: translateY(-2px); }
+        .show-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
         .card.has-tickets { border-left-color: var(--vintage-teal); }
         .card.planning { border-left-color: var(--golden-orange); }
         .show-card.in-planner {
@@ -526,14 +543,32 @@
         .card:hover .delete-btn { opacity: 1; }
         .delete-btn:hover { color: var(--orange); }
         .add-btn {
-            background: var(--gold); color: var(--dark); border: none;
-            border-radius: 50%; width: 32px; height: 32px;
-            font-size: 1.2rem; font-weight: 700; cursor: pointer;
-            transition: all 0.3s ease; display: flex;
-            align-items: center; justify-content: center; flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
-        .add-btn:hover { background: var(--orange); transform: scale(1.1); }
-        .add-btn.added { background: var(--vintage-teal); color: white; }
+        .add-btn:hover {
+            background: white;
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .add-btn.added {
+            background: var(--vintage-teal);
+            color: white;
+            border-color: var(--vintage-teal);
+        }
         .card-details, .show-details {
             font-size: 0.9rem; color: rgba(255, 248, 231, 0.8);
             display: flex; flex-direction: column; gap: 6px;
@@ -954,17 +989,17 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('planner')">📅 Your Planner</button>
-        <button class="tab-btn" onclick="switchTab('nighttime')">🎵 Fest by Night Library</button>
-        <button class="tab-btn" onclick="switchTab('jazzfest')">🎪 Jazz Fest Library</button>
+        <button class="tab-btn active" onclick="switchTab('planner')">Your Planner</button>
+        <button class="tab-btn" onclick="switchTab('nighttime')">Fest by Night Library</button>
+        <button class="tab-btn" onclick="switchTab('jazzfest')">Jazz Fest Library</button>
     </div>
 
     <div id="planner-tab" class="tab-content active">
         <div class="trip-info">
             <div class="trip-info-row">
-                <span>📅 April 29 - May 5</span>
+                <span>April 29 - May 5</span>
                 <span>🏨 Hotel Provincial</span>
-                <span>🎪 Festival: Apr 30 - May 3</span>
+                <span>Festival: Apr 30 - May 3</span>
             </div>
         </div>
         <div class="legend">
@@ -976,7 +1011,7 @@
             </div>
         </div>
         <div id="schedule-container"></div>
-        <button class="add-activity-btn" onclick="openAddActivityModal()">🍴 Add Activity</button>
+        <button class="add-activity-btn" onclick="openAddActivityModal()">Add Activity</button>
         <button class="add-show-btn" onclick="openAddModal()">+ Add Show</button>
     </div>
 
@@ -1072,7 +1107,7 @@
     </div>
 
     <div class="footer">
-        🎺 Let the good times roll! 🎷
+        Let the good times roll!
         <div class="powered-by">POWERED BY ARCHIVE</div>
     </div>
 
@@ -1323,8 +1358,8 @@ function renderSchedule() {
         section.className = 'day-section';
         let html = `<div class="day-header"><div><div class="day-title">${day.day}</div>${day.subtitle ? `<div class="day-subtitle">${day.subtitle}</div>` : ''}</div></div>`;
         const sectionConfig = {
-            evening: '🎵 Evening Shows', fest: '🎪 Jazz Fest Highlights',
-            postfest: '🎵 Post-Fest Shows', latenight: '🌙 Late Night Shows', other: '🍴 Other Activities'
+            evening: 'Evening Shows', fest: 'Jazz Fest Highlights',
+            postfest: 'Post-Fest Shows', latenight: 'Late Night Shows', other: 'Other Activities'
         };
         ['evening', 'fest', 'postfest', 'latenight', 'other'].forEach(sectionKey => {
             const events = day.events[sectionKey] || [];
@@ -1398,9 +1433,9 @@ function renderNighttimeLibrary() {
             } else if (show.showTime) {
                 timeInfo = `<div class="show-detail-row">🕐 ${show.showTime}</div>`;
             }
-            html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}">
+            html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}" onclick="event.target.classList.contains('add-btn') || ${inPlanner ? `removeFromPlannerConfirm('${show.name}')` : `openLibraryAddModal('${venueName}', ${idx}, 'nighttime')`}" style="cursor: pointer;">
                 <div class="show-header"><div class="show-name">${show.name}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="${inPlanner ? `removeFromPlannerConfirm('${show.name}')` : `openLibraryAddModal('${venueName}', ${idx}, 'nighttime')`}">${inPlanner ? '✓' : '+'}</button></div>
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="event.stopPropagation(); ${inPlanner ? `removeFromPlannerConfirm('${show.name}')` : `openLibraryAddModal('${venueName}', ${idx}, 'nighttime')`}">${inPlanner ? '✓' : '+'}</button></div>
                 <div class="show-details">${timeInfo}</div>${show.notes ? `<div class="show-notes">${show.notes}</div>` : ''}
                 <span class="show-day">${show.day}</span></div>`;
         });
@@ -1464,9 +1499,9 @@ function renderJazzFestLibrary() {
         allArtists.forEach((artistData, idx) => {
             const inPlanner = isShowInPlanner(artistData.name);
             const tierClass = artistData.searchResult ? 'tier1' : artistData.tier;
-            html += `<div class="show-card show-card-jazzfest ${tierClass} ${inPlanner ? 'in-planner' : ''}">
+            html += `<div class="show-card show-card-jazzfest ${tierClass} ${inPlanner ? 'in-planner' : ''}" onclick="event.target.classList.contains('add-btn') || ${inPlanner ? `removeFromPlannerConfirm('${artistData.name}')` : `openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')`}" style="cursor: pointer;">
                 <div class="show-header"><div class="show-name">${artistData.name}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="${inPlanner ? `removeFromPlannerConfirm('${artistData.name}')` : `openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')`}">${inPlanner ? '✓' : '+'}</button></div></div>`;
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="event.stopPropagation(); ${inPlanner ? `removeFromPlannerConfirm('${artistData.name}')` : `openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')`}">${inPlanner ? '✓' : '+'}</button></div></div>`;
         });
         
         html += '</div>';
