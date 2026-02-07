@@ -154,7 +154,31 @@
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 12px; margin-bottom: 20px;
         }
-        .card, .show-card {
+        .card {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px; padding: 16px; cursor: pointer;
+            transition: all 0.3s ease; position: relative;
+            border-left: 4px solid transparent;
+        }
+        .card.size-large {
+            grid-column: span 2;
+            padding: 24px;
+        }
+        .card.size-large .card-name {
+            font-size: 1.5rem;
+        }
+        .card.size-medium .card-name {
+            font-size: 1.2rem;
+        }
+        .card.size-small .card-name {
+            font-size: 1.05rem;
+        }
+        @media (max-width: 768px) {
+            .card.size-large {
+                grid-column: span 1;
+            }
+        }
+        .show-card {
             background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px; padding: 16px; cursor: pointer;
             transition: all 0.3s ease; position: relative;
@@ -170,6 +194,19 @@
         .show-card.in-planner {
             border-left: 4px solid var(--green);
             background: rgba(42, 157, 47, 0.1);
+        }
+        .show-card.tier1 {
+            grid-column: span 2;
+            padding: 24px;
+        }
+        .show-card.tier1 .show-name {
+            font-size: 1.5rem;
+        }
+        .show-card.tier2 .show-name {
+            font-size: 1.2rem;
+        }
+        .show-card.tier3 .show-name {
+            font-size: 1.05rem;
         }
         .card-header, .show-header {
             display: flex; justify-content: space-between;
@@ -293,9 +330,70 @@
                 bottom: 80px; right: 20px;
                 padding: 14px 22px; font-size: 0.9rem;
             }
-            .cards-grid, .shows-grid { grid-template-columns: 1fr; }
+            .cards-grid, .shows-grid { 
+                grid-template-columns: 1fr;
+                gap: 8px !important;
+            }
+            .show-card.tier1 {
+                grid-column: span 1;
+            }
             .day-title { font-size: 1.5rem; }
             .venue-name { font-size: 1.2rem; }
+            
+            /* Compact day sections on mobile */
+            .day-section, .venue-section {
+                padding: 16px !important;
+                margin-bottom: 16px !important;
+            }
+            .day-header, .venue-header {
+                margin-bottom: 12px !important;
+            }
+            .section-title {
+                font-size: 0.9rem !important;
+                margin: 12px 0 8px 0 !important;
+            }
+            
+            /* AGGRESSIVE mobile compact mode for ALL planner cards */
+            .card, .card.size-large, .card.size-medium, .card.size-small {
+                padding: 10px !important;
+                margin-bottom: 0 !important;
+                border-radius: 8px !important;
+            }
+            .card.size-large {
+                grid-column: span 1 !important;
+            }
+            .card-name, 
+            .card.size-large .card-name,
+            .card.size-medium .card-name,
+            .card.size-small .card-name {
+                font-size: 0.95rem !important;
+                line-height: 1.2 !important;
+                margin-bottom: 6px !important;
+            }
+            .card-details {
+                font-size: 0.8rem !important;
+                gap: 4px !important;
+            }
+            .card-detail-row {
+                font-size: 0.8rem !important;
+            }
+            .time-group {
+                gap: 2px !important;
+            }
+            .card-badge {
+                font-size: 0.65rem !important;
+                padding: 2px 6px !important;
+                margin-top: 6px !important;
+            }
+            .card-notes {
+                font-size: 0.75rem !important;
+                margin-top: 6px !important;
+                line-height: 1.3 !important;
+            }
+            .delete-btn {
+                font-size: 1rem !important;
+                padding: 2px 6px !important;
+            }
         }
     </style>
 </head>
@@ -307,8 +405,8 @@
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('planner')">📅 Your Planner</button>
-        <button class="tab-btn" onclick="switchTab('nighttime')">🎵 Nighttime Shows</button>
-        <button class="tab-btn" onclick="switchTab('jazzfest')">🎪 Jazz Fest</button>
+        <button class="tab-btn" onclick="switchTab('nighttime')">🎵 Fest by Night Library</button>
+        <button class="tab-btn" onclick="switchTab('jazzfest')">🎪 Jazz Fest Library</button>
     </div>
 
     <div id="planner-tab" class="tab-content active">
@@ -380,6 +478,13 @@
                     <option value="planning">Planning to go</option>
                 </select>
             </div>
+            <div class="form-group"><label>Card Size</label>
+                <select id="edit-card-size">
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
             <div class="form-group"><label>Notes</label><textarea id="edit-notes" placeholder="Add any notes, lineup details, or reminders..."></textarea></div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="saveEvent()">Save</button>
@@ -426,8 +531,8 @@ function getDefaultScheduleData() {
             day: "Wednesday, April 29", subtitle: "Daze Between",
             events: {
                 evening: [
-                    { id: 'wed-1', name: "Grahame Lesh & Friends", venue: "The Joy Theatre", doorTime: "", showTime: "7:30pm", ticketStatus: "none", notes: "ft. Ivan Neville, Jake Brownstein, Cory Henry" },
-                    { id: 'wed-2', name: "Daze Between Band", venue: "Tipitina's", doorTime: "", showTime: "10:00pm", ticketStatus: "none", notes: "Eric Krasno, George Porter Jr., Ivan Neville, Oteil Burbridge, Cory Henry, Tony Hall, Raymond Weber, Eric Bloom, Kanika Moore, Ryan Zoidis" }
+                    { id: 'wed-1', name: "Grahame Lesh & Friends", venue: "The Joy Theatre", doorTime: "", showTime: "7:30pm", ticketStatus: "none", cardSize: "medium", notes: "ft. Ivan Neville, Jake Brownstein, Cory Henry" },
+                    { id: 'wed-2', name: "Daze Between Band", venue: "Tipitina's", doorTime: "", showTime: "10:00pm", ticketStatus: "none", cardSize: "medium", notes: "Eric Krasno, George Porter Jr., Ivan Neville, Oteil Burbridge, Cory Henry, Tony Hall, Raymond Weber, Eric Bloom, Kanika Moore, Ryan Zoidis" }
                 ], postfest: [], latenight: [], other: []
             }
         },
@@ -435,12 +540,12 @@ function getDefaultScheduleData() {
             day: "Thursday, April 30", subtitle: "Locals Thursday",
             events: {
                 fest: [
-                    { id: 'thu-f1', name: "Widespread Panic", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'thu-f2', name: "Lake Street Dive", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'thu-f3', name: "Lettuce", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                    { id: 'thu-f1', name: "Widespread Panic", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'thu-f2', name: "Lake Street Dive", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'thu-f3', name: "Lettuce", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" }
                 ],
-                postfest: [{ id: 'thu-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", notes: "'An Evening With Wilco' - two full sets" }],
-                latenight: [{ id: 'thu-2', name: "Magoo", venue: "Chickie Wah Wah", doorTime: "12:30am", showTime: "1:00am", ticketStatus: "none", notes: "" }],
+                postfest: [{ id: 'thu-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "'An Evening With Wilco' - two full sets" }],
+                latenight: [{ id: 'thu-2', name: "Magoo", venue: "Chickie Wah Wah", doorTime: "12:30am", showTime: "1:00am", ticketStatus: "none", cardSize: "medium", notes: "" }],
                 other: []
             }
         },
@@ -448,14 +553,14 @@ function getDefaultScheduleData() {
             day: "Friday, May 1", subtitle: "",
             events: {
                 fest: [
-                    { id: 'fri-f1', name: "The Black Keys", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'fri-f2', name: "Ziggy Marley", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'fri-f3', name: "Rickie Lee Jones", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'fri-f4', name: "Lainey Wilson", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'fri-f5', name: "California Honeydrops", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                    { id: 'fri-f1', name: "The Black Keys", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'fri-f2', name: "Ziggy Marley", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'fri-f3', name: "Rickie Lee Jones", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'fri-f4', name: "Lainey Wilson", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'fri-f5', name: "California Honeydrops", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" }
                 ],
-                postfest: [{ id: 'fri-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", notes: "'An Evening With Wilco' - two full sets" }],
-                latenight: [{ id: 'fri-2', name: "Neal Francis", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", notes: "w/ The Breaks (Eddie Roberts, Robert Walter, Stanton Moore)" }],
+                postfest: [{ id: 'fri-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "'An Evening With Wilco' - two full sets" }],
+                latenight: [{ id: 'fri-2', name: "Neal Francis", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", cardSize: "medium", notes: "w/ The Breaks (Eddie Roberts, Robert Walter, Stanton Moore)" }],
                 other: []
             }
         },
@@ -463,19 +568,19 @@ function getDefaultScheduleData() {
             day: "Saturday, May 2", subtitle: "",
             events: {
                 fest: [
-                    { id: 'sat-f1', name: "Eagles", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sat-f2', name: "Alabama Shakes", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sat-f3', name: "T-Pain", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sat-f4', name: "Dianne Reeves", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sat-f5', name: "Dumpstaphunk", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sat-f6', name: "Little Feat", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sat-f7', name: "Sierra Hull", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                    { id: 'sat-f1', name: "Eagles", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sat-f2', name: "Alabama Shakes", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sat-f3', name: "T-Pain", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sat-f4', name: "Dianne Reeves", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sat-f5', name: "Dumpstaphunk", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sat-f6', name: "Little Feat", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sat-f7', name: "Sierra Hull", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" }
                 ],
                 postfest: [
-                    { id: 'sat-1', name: "Anders Osborne Birthday Bash", venue: "Civic Theatre", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", notes: "With Dave Malone, Jackie Greene, Lindsay Lou, Rebirth Brass Band" },
-                    { id: 'sat-2', name: "Joe Russo's Almost Dead (JRAD)", venue: "Fillmore New Orleans", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", notes: "One night only. Joe Russo, Marco Benevento, Dave Dreiwitz, Tom Hamilton, Scott Metzger" }
+                    { id: 'sat-1', name: "Anders Osborne Birthday Bash", venue: "Civic Theatre", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "With Dave Malone, Jackie Greene, Lindsay Lou, Rebirth Brass Band" },
+                    { id: 'sat-2', name: "Joe Russo's Almost Dead (JRAD)", venue: "Fillmore New Orleans", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "One night only. Joe Russo, Marco Benevento, Dave Dreiwitz, Tom Hamilton, Scott Metzger" }
                 ],
-                latenight: [{ id: 'sat-3', name: "FiyaPowa", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", notes: "Members of Dumpstaphunk & Galactic" }],
+                latenight: [{ id: 'sat-3', name: "FiyaPowa", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", cardSize: "medium", notes: "Members of Dumpstaphunk & Galactic" }],
                 other: []
             }
         },
@@ -483,12 +588,12 @@ function getDefaultScheduleData() {
             day: "Sunday, May 3", subtitle: "",
             events: {
                 fest: [
-                    { id: 'sun-f1', name: "Tedeschi Trucks Band", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sun-f2', name: "Teddy Swims", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sun-f3', name: "Earth, Wind & Fire", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sun-f4', name: "Herbie Hancock", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sun-f5', name: "Trombone Shorty & Orleans Avenue", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" },
-                    { id: 'sun-f6', name: "Rebirth Brass Band", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", notes: "" }
+                    { id: 'sun-f1', name: "Tedeschi Trucks Band", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sun-f2', name: "Teddy Swims", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sun-f3', name: "Earth, Wind & Fire", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sun-f4', name: "Herbie Hancock", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sun-f5', name: "Trombone Shorty & Orleans Avenue", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
+                    { id: 'sun-f6', name: "Rebirth Brass Band", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" }
                 ],
                 postfest: [], latenight: [], other: []
             }
@@ -533,10 +638,60 @@ const nighttimeLibrary = {
 };
 
 const jazzFestLibrary = {
-    "Thursday, April 30": ["Widespread Panic", "Lake Street Dive", "Lettuce", "Alejandro Escovedo", "Fred Wesley", "Sweet Crude", "Terrance Simien"],
-    "Friday, May 1": ["The Black Keys", "Ziggy Marley", "Rickie Lee Jones", "Lainey Wilson", "California Honeydrops", "Marc Broussard", "BeauSoleil", "Tab Benoit", "Bonerama", "Hot 8 Brass Band"],
-    "Saturday, May 2": ["Eagles", "Alabama Shakes", "T-Pain", "Dianne Reeves", "Big Freedia", "Dumpstaphunk", "Little Feat", "Sierra Hull", "Anders Osborne", "The Soul Rebels"],
-    "Sunday, May 3": ["Tedeschi Trucks Band", "Teddy Swims", "Earth, Wind & Fire", "Herbie Hancock", "Trombone Shorty", "Mavis Staples", "Galactic", "Rebirth Brass Band", "Jon Cleary"]
+    "Thursday, April 30": {
+        tier1: ["Widespread Panic", "Lake Street Dive", "Leela James"],
+        tier2: ["Lettuce", "Alejandro Escovedo", "Fred Wesley and his New JBs", "Grace Bowers"],
+        tier3: ["Sweet Crude", "Buckwheat Zydeco Jr.", "Zigaboo Modeliste Funk Revue", "Jourdan Thibodeaux et Les Rôdailleurs", 
+                "Judith Owen & The Callers", "Mike Zito Band", "Tonya Boyd-Cannon", "Terrance Simien & the Zydeco Experience", 
+                "Batiste Brothers Band", "Isaiah Collier", "The Tropicales", "Charmaine Neville", "Jesse Royal", "The Rising Suns", 
+                "Kaya Jonkunnu Band", "Walking Tall Jamaica", "Higher Heights Reggae", "The Iguanas", "Hans Williams", "John Papa Gros", 
+                "The Iceman Special", "Flagboy Giz", "Frank Waln", "Paul Porter and The Christianaires", "Anna Moss", "New Breed Brass Band", 
+                "Cedric Watson et Bijou Créole", "Clive Wilson's New Orleans Serenaders", "Grayson Capps", "Johnny Sansone", 
+                "Pat Casey and the New Sound", "Soul Brass Band", "Ricky Sebastian", "Steve Masakowski Family & Friends", 
+                "Hot Club of New Orleans", "Ingrid Lucia", "The Palmetto Bug Stompers", "Ambush Reggae Band", "White Eagle Singers", 
+                "Sons of Jazz Brass Band", "The New Orleans Rug Cutters", "Forgotten Souls", "Sasha Masakowski", "Micah McKee", 
+                "Helen Gillet", "James Linden Hogg", "Ryan Brunet and the Malfecteurs", "Steve Austin & The Bioniq Brass Band"]
+    },
+    "Friday, May 1": {
+        tier1: ["Lainey Wilson", "The Black Keys", "Ziggy Marley"],
+        tier2: ["Rickie Lee Jones", "Dragon Smoke", "Marc Broussard", "Original Koffee"],
+        tier3: ["Terence Blanchard + Ravi Coltrane", "The California Honeydrops", "BeauSoleil avec Michael Doucet", "Tab Benoit", 
+                "Jekalyn Carr", "Bonerama", "Hot 8 Brass Band", "Cha Wa", "Charlie Gabriel and Friends", "John Foster", 
+                "Runkus & Royal Blu", "The Skatalites", "The Rising Suns", "Kaya Jonkunnu Band", "Walking Tall Jamaica", 
+                "Bruce Daigrepoint Cajun Band", "Amanda Shaw and The Cute Guys", "Sue Foley", "Sunpie ak Vodou Blues Ayiti", 
+                "Gal Holiday & The Honky Tonk Revue", "D.K. Harrell Band", "Geno Delafose & French Rockin' Boogie", 
+                "Tony Hall & The New Orleans Soul Stars", "Gerald French & The Original Tuxedo Jazz Band", "Big Chief Juan & Jockimo's Groove", 
+                "Meschiya Lake and the Little Big Horns", "Debbie Davis and Friends", "Kevin Sonny Gullage & Blues Groovers", 
+                "Victor Campbell", "Larry Sieberth presents Da Groove", "Andrew Jobin and the Thick Smoke", "Corey Ledet Zydeco", 
+                "Baby Boyz Brass Band", "Los Guiros", "Pocket Chocolate", "Tyron Benoit Band", "Panorama Jazz Band", "Sarah Quintana", 
+                "Muévelo", "Big Chief Kevin Goodman & the Flaming Arrows"]
+    },
+    "Saturday, May 2": {
+        tier1: ["Eagles", "Alabama Shakes", "T-Pain"],
+        tier2: ["Dianne Reeves", "Big Freedia", "Dumpstaphunk", "Little Feat", "Sierra Hull"],
+        tier3: ["Larry McCray", "The Soul Rebels", "Anders Osborne", "The Gospel Soul of Irma Thomas", "Corey Henry & The Treme Funktet", 
+                "Leo Nocentelli of The Meters", "C.J. Chenier & the Red Hot Louisiana Band", "Leyla McCalla", "Wayne Toups", "Dee-1", 
+                "Delfeayo Marsalis & The Uptown Jazz Orchestra", "Eric Lindell", "The Skatalites", "Yaadcore", "Runkus & Royal Blu", 
+                "Jemere Morgan", "Kaya Jonkunnu Band", "Walking Tall Jamaica", "Nathan & The Zydeco Cha Chas", "J & The Causeways", 
+                "Creole String Beans", "Honey Island Swamp Band", "Jeremy Davenport", "Ghalia Volt", "Lilli Lewis", 
+                "Jermaine Landrum & The Abundant Praise Revival Choir", "Mia Borders", "Midnite Disturbers", "Leroy Jones & New Orleans' Finest", 
+                "Alexey Marti & Sugarflow", "John Mooney & Bluesiana", "Susan Cowsill", "Savoy Family Cajun Band", 
+                "Dustin Dale Gaspard & the Rockin Babines", "Bill Summers & Jazalsa", "Mark Braud's New Orleans Jazz Giants", 
+                "Seguenon Kone's Ivoire Spectacle", "Hardhead Hunters Mardi Gras Indians", "Johanna Rose", "Storyville Stompers Brass Band"]
+    },
+    "Sunday, May 3": {
+        tier1: ["Teddy Swims", "Earth, Wind & Fire", "Tedeschi Trucks Band"],
+        tier2: ["Herbie Hancock", "Trombone Shorty & Orleans Avenue", "Mavis Staples"],
+        tier3: ["Galactic featuring Jelly Joseph", "The Radiators", "Rebirth Brass Band", "Jackie Venson", "Big Sam's Funky Nation", 
+                "George Porter Jr & Runnin' Pardners", "Jon Cleary & the Absolute Monster Gentlemen", "Steve Earle featuring Anders Osborne", 
+                "Lila Iké", "Kevin Downswell", "Jemere Morgan", "Kaya Jonkunnu Band", "Walking Tall Jamaica", 
+                "Kermit Ruffins' Tribute to Louis Armstrong", "Deacon John", "Shamarr Allen", "RAM from Haiti", "Lil' Nathan & the Zydeco Big Timers", 
+                "Big Chief Bo Dollis Jr. & The Wild Magnolias", "James Andrews & the Crescent City Allstars", "Jason Marsalis", "Andrew Duhon", 
+                "Davell Crawford presents Fabulous Friends Forever", "Trumpet Mafia's Tribute to Miles Davis", "Doreen's Jazz New Orleans", 
+                "Steve Riley & the Mamou Playboys", "Banu Gibson", "The Allen Toussaint Jazzity Project", "Greg Stafford & His Young Tuxedo Brass Band", 
+                "Raphael Bas and Harmonouche", "Herbert McCarver & Pin Stripe Brass Band", "James McClaskey & The Rhythm Band", "BRW", 
+                "Mariachi Jalisco", "Original Pinettes Brass Band", "Robin Barnes & the FiyaBirds"]
+    }
 };
 
 let scheduleData = getDefaultScheduleData();
@@ -633,6 +788,7 @@ function renderSchedule() {
 
 function renderCard(evt, dayKey) {
     const statusClass = evt.ticketStatus === 'tickets' ? 'has-tickets' : evt.ticketStatus === 'planning' ? 'planning' : '';
+    const sizeClass = evt.cardSize ? `size-${evt.cardSize}` : 'size-medium';
     let badge = evt.ticketStatus === 'tickets' ? '<span class="card-badge tickets">✓ Have Tickets</span>' : 
                 evt.ticketStatus === 'planning' ? '<span class="card-badge planning">Planning to Go</span>' : '';
     let timeInfo = '';
@@ -641,7 +797,7 @@ function renderCard(evt, dayKey) {
     } else if (evt.showTime) {
         timeInfo = `<div class="card-detail-row">🕐 ${evt.showTime}</div>`;
     }
-    return `<div class="card ${statusClass}" onclick="if(!event.target.classList.contains('delete-btn')) openEditModal('${dayKey}', '${evt.id}')">
+    return `<div class="card ${statusClass} ${sizeClass}" onclick="if(!event.target.classList.contains('delete-btn')) openEditModal('${dayKey}', '${evt.id}')">
         <div class="card-header"><div class="card-name">${evt.name}</div>
         <button class="delete-btn" data-day="${dayKey}" data-id="${evt.id}">×</button></div>
         <div class="card-details">${evt.venue ? `<div class="card-detail-row">📍 ${evt.venue}</div>` : ''}${timeInfo}</div>
@@ -725,20 +881,41 @@ function renderJazzFestLibrary() {
                       dayName.toLowerCase().includes('friday') ? 'friday' :
                       dayName.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
         if (jazzfestFilter !== 'all' && jazzfestFilter !== dayKey) return;
-        let artists = jazzFestLibrary[dayName];
-        if (jazzfestSearch) artists = artists.filter(a => a.toLowerCase().includes(jazzfestSearch));
-        if (artists.length === 0) return;
+        
+        const dayData = jazzFestLibrary[dayName];
+        let allArtists = [];
+        
+        // If searching, collect all artists and filter, showing at full size
+        if (jazzfestSearch) {
+            ['tier1', 'tier2', 'tier3'].forEach(tier => {
+                dayData[tier].forEach(artist => {
+                    if (artist.toLowerCase().includes(jazzfestSearch)) {
+                        allArtists.push({ name: artist, tier: 'tier1', searchResult: true });
+                    }
+                });
+            });
+            if (allArtists.length === 0) return;
+        } else {
+            // No search - show with hierarchy
+            dayData.tier1.forEach(artist => allArtists.push({ name: artist, tier: 'tier1' }));
+            dayData.tier2.forEach(artist => allArtists.push({ name: artist, tier: 'tier2' }));
+            dayData.tier3.forEach(artist => allArtists.push({ name: artist, tier: 'tier3' }));
+        }
+        
         hasResults = true;
         const section = document.createElement('div');
         section.className = 'venue-section';
         let html = `<div class="venue-header"><div><div class="venue-name">${dayName}</div><div class="venue-address">Fair Grounds</div></div></div><div class="shows-grid">`;
-        artists.forEach((artist, idx) => {
-            const inPlanner = isShowInPlanner(artist);
-            html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}">
-                <div class="show-header"><div class="show-name">${artist}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', ${idx}, 'jazzfest')">${inPlanner ? '✓' : '+'}</button></div>
+        
+        allArtists.forEach((artistData, idx) => {
+            const inPlanner = isShowInPlanner(artistData.name);
+            const tierClass = artistData.searchResult ? 'tier1' : artistData.tier;
+            html += `<div class="show-card ${tierClass} ${inPlanner ? 'in-planner' : ''}">
+                <div class="show-header"><div class="show-name">${artistData.name}</div>
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest')">${inPlanner ? '✓' : '+'}</button></div>
                 <div class="show-details"><div class="show-detail-row">📍 Fair Grounds</div></div></div>`;
         });
+        
         html += '</div>';
         section.innerHTML = html;
         container.appendChild(section);
@@ -753,6 +930,7 @@ function openAddModal() {
     document.getElementById('edit-day').value = 'wednesday';
     ['edit-name', 'edit-venue', 'edit-door-time', 'edit-show-time', 'edit-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('edit-ticket-status').value = 'none';
+    document.getElementById('edit-card-size').value = 'medium';
     document.getElementById('edit-modal').classList.add('active');
 }
 
@@ -763,6 +941,7 @@ function openAddActivityModal() {
     document.getElementById('edit-day').value = 'wednesday';
     ['edit-name', 'edit-venue', 'edit-door-time', 'edit-show-time', 'edit-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('edit-ticket-status').value = 'none';
+    document.getElementById('edit-card-size').value = 'small';
     document.getElementById('edit-modal').classList.add('active');
 }
 
@@ -784,6 +963,7 @@ function openEditModal(dayKey, eventId) {
     document.getElementById('edit-door-time').value = foundEvent.doorTime || '';
     document.getElementById('edit-show-time').value = foundEvent.showTime || '';
     document.getElementById('edit-ticket-status').value = foundEvent.ticketStatus || 'none';
+    document.getElementById('edit-card-size').value = foundEvent.cardSize || 'medium';
     document.getElementById('edit-notes').value = foundEvent.notes || '';
     document.getElementById('edit-modal').classList.add('active');
 }
@@ -804,6 +984,7 @@ function saveEvent() {
         doorTime: document.getElementById('edit-door-time').value.trim(),
         showTime: document.getElementById('edit-show-time').value.trim(),
         ticketStatus: document.getElementById('edit-ticket-status').value,
+        cardSize: document.getElementById('edit-card-size').value,
         notes: document.getElementById('edit-notes').value.trim()
     };
     if (isAddMode) {
@@ -855,11 +1036,11 @@ document.addEventListener('click', function(e) {
     }
 }, true);
 
-function openLibraryAddModal(source, index, type) {
+function openLibraryAddModal(source, indexOrName, type) {
     let show;
     if (type === 'nighttime') {
         const venue = nighttimeLibrary[source];
-        show = venue.shows[index];
+        show = venue.shows[indexOrName]; // indexOrName is index for nighttime
         if (isShowInPlanner(show.name)) return;
         selectedLibraryShow = {
             name: show.name, venue: `${source} (${venue.address})`,
@@ -869,8 +1050,7 @@ function openLibraryAddModal(source, index, type) {
         document.getElementById('library-day').value = show.day;
         document.getElementById('library-section').value = (show.showTime && (show.showTime.includes('am') || parseInt(show.showTime) >= 12)) ? 'latenight' : 'postfest';
     } else {
-        const artists = jazzFestLibrary[source];
-        const artist = artists[index];
+        const artist = indexOrName; // indexOrName is artist name for jazzfest
         if (isShowInPlanner(artist)) return;
         const dayKey = source.toLowerCase().includes('thursday') ? 'thursday' :
                       source.toLowerCase().includes('friday') ? 'friday' :
