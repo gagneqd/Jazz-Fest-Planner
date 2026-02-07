@@ -164,7 +164,7 @@
         .show-card-jazzfest {
             display: inline-flex !important;
             align-items: center;
-            border-radius: 20px;
+            border-radius: 8px;
             padding: 8px 14px;
             min-height: 36px;
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -399,8 +399,38 @@
             }
             
             .shows-grid {
-                grid-template-columns: 1fr;
+                display: grid !important;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
                 gap: 8px !important;
+            }
+            
+            /* Nighttime library cards - compact like planner info cards */
+            .show-card {
+                padding: 8px !important;
+                border-radius: 8px !important;
+            }
+            .show-card .show-name {
+                font-size: 0.85rem !important;
+                line-height: 1.2 !important;
+                margin-bottom: 4px !important;
+            }
+            .show-card .show-details {
+                font-size: 0.72rem !important;
+                gap: 2px !important;
+            }
+            .show-card .show-notes {
+                font-size: 0.7rem !important;
+                margin-top: 4px !important;
+            }
+            .show-card .show-day {
+                font-size: 0.65rem !important;
+                padding: 2px 6px !important;
+                margin-top: 4px !important;
+            }
+            .show-card .add-btn {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 1.1rem !important;
             }
             
             /* Jazz Fest Library Pills on mobile */
@@ -412,7 +442,7 @@
             .show-card-jazzfest {
                 padding: 6px 10px !important;
                 min-height: 28px !important;
-                border-radius: 16px !important;
+                border-radius: 8px !important;
             }
             .show-card-jazzfest.tier1 {
                 flex: 0 1 calc(50% - 3px) !important;
@@ -463,7 +493,7 @@
             /* JAZZ FEST PILLS (fest section only) */
             .card.card-fest {
                 position: relative !important;
-                border-radius: 16px !important;
+                border-radius: 8px !important;
                 padding: 6px 10px !important;
                 border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
                 background: rgba(0, 0, 0, 0.35) !important;
@@ -1072,7 +1102,7 @@ function renderNighttimeLibrary() {
             }
             html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}">
                 <div class="show-header"><div class="show-name">${show.name}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${venueName}', ${idx}, 'nighttime')">${inPlanner ? '✓' : '+'}</button></div>
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="${inPlanner ? `removeFromPlannerConfirm('${show.name}')` : `openLibraryAddModal('${venueName}', ${idx}, 'nighttime')`}">${inPlanner ? '✓' : '+'}</button></div>
                 <div class="show-details">${timeInfo}</div>${show.notes ? `<div class="show-notes">${show.notes}</div>` : ''}
                 <span class="show-day">${show.day}</span></div>`;
         });
@@ -1138,7 +1168,7 @@ function renderJazzFestLibrary() {
             const tierClass = artistData.searchResult ? 'tier1' : artistData.tier;
             html += `<div class="show-card show-card-jazzfest ${tierClass} ${inPlanner ? 'in-planner' : ''}">
                 <div class="show-header"><div class="show-name">${artistData.name}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')">${inPlanner ? '✓' : '+'}</button></div></div>`;
+                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="${inPlanner ? `removeFromPlannerConfirm('${artistData.name}')` : `openLibraryAddModal('${dayName}', '${artistData.name}', 'jazzfest', '${artistData.tier}')`}">${inPlanner ? '✓' : '+'}</button></div></div>`;
         });
         
         html += '</div>';
@@ -1292,6 +1322,34 @@ function openLibraryAddModal(source, indexOrName, type, tier) {
 function closeLibraryModal() {
     document.getElementById('add-from-library-modal').classList.remove('active');
     selectedLibraryShow = null;
+}
+
+function removeFromPlannerConfirm(showName) {
+    if (confirm(`Remove "${showName}" from your planner?`)) {
+        // Find and remove the show from all days/sections
+        let removed = false;
+        Object.keys(scheduleData).forEach(dayKey => {
+            Object.keys(scheduleData[dayKey].events).forEach(sectionKey => {
+                const events = scheduleData[dayKey].events[sectionKey];
+                const index = events.findIndex(e => 
+                    e.name.toLowerCase().includes(showName.toLowerCase()) ||
+                    showName.toLowerCase().includes(e.name.toLowerCase())
+                );
+                if (index !== -1) {
+                    events.splice(index, 1);
+                    removed = true;
+                }
+            });
+        });
+        
+        if (removed) {
+            saveToStorage();
+            // Re-render current view
+            if (currentTab === 'nighttime') renderNighttimeLibrary();
+            else if (currentTab === 'jazzfest') renderJazzFestLibrary();
+            else if (currentTab === 'planner') renderSchedule();
+        }
+    }
 }
 
 function confirmLibraryAdd() {
