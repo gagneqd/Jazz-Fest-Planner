@@ -1691,9 +1691,15 @@ function renderNighttimeLibrary() {
             } else if (show.showTime) {
                 timeInfo = `<div class="show-detail-row">🕐 ${show.showTime}</div>`;
             }
-            html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}" onclick="event.target.classList.contains('add-btn') || ${inPlanner ? `removeFromPlannerConfirm('${show.name}')` : `openLibraryAddModal('${venueName}', ${idx}, 'nighttime')`}" style="cursor: pointer;">
+            const safeVenue = encodeURIComponent(venueName);
+            const safeName = encodeURIComponent(show.name);
+            html += `<div class="show-card ${inPlanner ? 'in-planner' : ''}" 
+                data-venue="${safeVenue}" data-idx="${idx}" data-name="${safeName}" data-inplanner="${inPlanner}"
+                onclick="handleNighttimeCardClick(this, event)" style="cursor: pointer;">
                 <div class="show-header"><div class="show-name">${show.name}</div>
-                <button class="add-btn ${inPlanner ? 'added' : ''}" onclick="event.stopPropagation(); ${inPlanner ? `removeFromPlannerConfirm('${show.name}')` : `openLibraryAddModal('${venueName}', ${idx}, 'nighttime')`}">${inPlanner ? '✓' : '+'}</button></div>
+                <button class="add-btn ${inPlanner ? 'added' : ''}" 
+                    data-venue="${safeVenue}" data-idx="${idx}" data-name="${safeName}" data-inplanner="${inPlanner}"
+                    onclick="event.stopPropagation(); handleNighttimeAddClick(this)">${inPlanner ? '✓' : '+'}</button></div>
                 <div class="show-details">${timeInfo}</div>${show.notes ? `<div class="show-notes">${show.notes}</div>` : ''}
                 <span class="show-day">${show.day}</span></div>`;
         });
@@ -1881,6 +1887,31 @@ document.addEventListener('click', function(e) {
         }
     }
 }, true);
+
+function handleNighttimeCardClick(el, event) {
+    if (event.target.classList.contains('add-btn')) return;
+    const inPlanner = el.dataset.inplanner === 'true';
+    const name = decodeURIComponent(el.dataset.name);
+    const venue = decodeURIComponent(el.dataset.venue);
+    const idx = parseInt(el.dataset.idx);
+    if (inPlanner) {
+        removeFromPlannerConfirm(name);
+    } else {
+        openLibraryAddModal(venue, idx, 'nighttime');
+    }
+}
+
+function handleNighttimeAddClick(btn) {
+    const inPlanner = btn.dataset.inplanner === 'true';
+    const name = decodeURIComponent(btn.dataset.name);
+    const venue = decodeURIComponent(btn.dataset.venue);
+    const idx = parseInt(btn.dataset.idx);
+    if (inPlanner) {
+        removeFromPlannerConfirm(name);
+    } else {
+        openLibraryAddModal(venue, idx, 'nighttime');
+    }
+}
 
 function openLibraryAddModal(source, indexOrName, type, tier) {
     let show;
