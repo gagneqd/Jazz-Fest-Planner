@@ -1195,20 +1195,14 @@ try {
     console.warn('Firebase initialization failed, falling back to localStorage:', error);
 }
 
-// Get or create planner ID from URL
+// Fixed planner ID - all devices always use this same planner
+const FIXED_PLANNER_ID = 'gagne-jazz-fest-2026';
+
 function getPlannerId() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('planner');
-    
-    if (!id) {
-        // Generate new planner ID if none exists
-        id = 'planner-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-        // Update URL without reload
-        const newUrl = window.location.pathname + '?planner=' + id;
-        window.history.replaceState({}, '', newUrl);
-    }
-    
-    return id;
+    // Always use the fixed ID - no more random IDs per session
+    const newUrl = window.location.pathname + '?planner=' + FIXED_PLANNER_ID;
+    window.history.replaceState({}, '', newUrl);
+    return FIXED_PLANNER_ID;
 }
 
 plannerId = getPlannerId();
