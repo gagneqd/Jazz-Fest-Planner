@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gagne Jazz Fest 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { overflow-x: hidden; }
@@ -1112,6 +1117,115 @@
     </div>
 
     <script>
+// ============================================
+// FIREBASE CONFIGURATION & INITIALIZATION
+// ============================================
+
+// Firebase config
+const firebaseConfig = {
+    apiKey: "AIzaSyBGsRatateNYi4omyFJQVsizhQjI_IH4qY",
+    authDomain: "jazz-fest-archive.firebaseapp.com",
+    projectId: "jazz-fest-archive",
+    storageBucket: "jazz-fest-archive.firebasestorage.app",
+    messagingSenderId: "11586231017",
+    appId: "1:11586231017:web:8436ce0cb0d66b6ab16e78",
+    measurementId: "G-G82P47DM3Y"
+};
+
+// Initialize Firebase
+let db = null;
+let plannerId = null;
+let unsubscribe = null;
+
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.warn('Firebase initialization failed, falling back to localStorage:', error);
+}
+
+// Get or create planner ID from URL
+function getPlannerId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get('planner');
+    
+    if (!id) {
+        // Generate new planner ID if none exists
+        id = 'planner-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        // Update URL without reload
+        const newUrl = window.location.pathname + '?planner=' + id;
+        window.history.replaceState({}, '', newUrl);
+    }
+    
+    return id;
+}
+
+plannerId = getPlannerId();
+
+// Save data to Firebase
+async function saveToFirebase(data) {
+    if (!db || !plannerId) {
+        console.log('Firebase not available, using localStorage');
+        localStorage.setItem('gagne-jazz-fest-2026-v3', JSON.stringify(data));
+        return;
+    }
+    
+    try {
+        await db.collection('planners').doc(plannerId).set({
+            scheduleData: data,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('Saved to Firebase:', plannerId);
+    } catch (error) {
+        console.error('Firebase save error:', error);
+        // Fallback to localStorage
+        localStorage.setItem('gagne-jazz-fest-2026-v3', JSON.stringify(data));
+    }
+}
+
+// Load data from Firebase
+async function loadFromFirebase() {
+    if (!db || !plannerId) {
+        console.log('Firebase not available, using localStorage');
+        const saved = localStorage.getItem('gagne-jazz-fest-2026-v3');
+        return saved ? JSON.parse(saved) : null;
+    }
+    
+    try {
+        const doc = await db.collection('planners').doc(plannerId).get();
+        if (doc.exists) {
+            console.log('Loaded from Firebase:', plannerId);
+            return doc.data().scheduleData;
+        }
+        return null;
+    } catch (error) {
+        console.error('Firebase load error:', error);
+        // Fallback to localStorage
+        const saved = localStorage.getItem('gagne-jazz-fest-2026-v3');
+        return saved ? JSON.parse(saved) : null;
+    }
+}
+
+// Subscribe to real-time updates
+function subscribeToUpdates(callback) {
+    if (!db || !plannerId) return;
+    
+    unsubscribe = db.collection('planners').doc(plannerId)
+        .onSnapshot((doc) => {
+            if (doc.exists) {
+                console.log('Real-time update received');
+                callback(doc.data().scheduleData);
+            }
+        }, (error) => {
+            console.error('Real-time subscription error:', error);
+        });
+}
+
+// ============================================
+// DEFAULT SCHEDULE DATA
+// ============================================
+
 // Default schedule data
 function getDefaultScheduleData() {
     return {
@@ -1196,13 +1310,22 @@ const nighttimeLibrary = {
         { name: "The Meters", day: "saturday", doorTime: "", showTime: "8:00pm", notes: "SOLD OUT" }
     ]},
     "Fillmore New Orleans": { address: "6 Canal St.", shows: [
-        { name: "Karl Denson's Tiny Universe", day: "thursday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Jimmy Cliff Celebration. Tickets from $51" },
+        { name: "Karl Denson's Tiny Universe", day: "thursday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Jimmy Cliff Celebration w/ Bernard Fowler & La Lom. Tickets from $51" },
         { name: "Joe Russo's Almost Dead (JRAD)", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $81" },
         { name: "Ari Lennox", day: "sunday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $75" }
     ]},
+    "Orpheum Theatre": { address: "129 Roosevelt Way", shows: [
+        { name: "Warren Haynes - Dreams & Songs", day: "thursday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Symphonic Experience with Louisiana Philharmonic" },
+        { name: "Gov't Mule - Jazz AfterDark", day: "friday", doorTime: "", showTime: "9:00pm", notes: "" },
+        { name: "The Marcus King Band", day: "saturday", doorTime: "", showTime: "9:00pm", notes: "Waltz Across Texas" }
+    ]},
+    "The Joy Theater": { address: "1200 Canal St", shows: [
+        { name: "Lettuce - RAGE!FEST", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets from $59" },
+        { name: "The Heavyweights", day: "friday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Cory Henry, Eric Krasno, Robert Sput Searight w/ Oteil Burbridge. Tickets from $53" }
+    ]},
     "Civic Theatre": { address: "510 O'Keefe Ave.", shows: [
-        { name: "Daniel Donato's Cosmic NOLA", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets from $48" },
-        { name: "Anders Osborne's NOLA Birthday Bash", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $55" }
+        { name: "Daniel Donato's Cosmic NOLA", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "w/ George Porter Jr., Al Schnier, Kanika Moore. Tickets from $48" },
+        { name: "Anders Osborne's NOLA Birthday Bash", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "w/ Rebirth Brass Band, Dave Malone, Jackie Greene, Lindsay Lou. Tickets from $55" }
     ]},
     "Tipitina's": { address: "501 Napoleon Avenue", shows: [
         { name: "The Iceman Special", day: "thursday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $34" },
@@ -1213,15 +1336,78 @@ const nighttimeLibrary = {
         { name: "Dumpstaphunk", day: "sunday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets $47" }
     ]},
     "Chickie Wah Wah": { address: "2828 Canal Street", shows: [
-        { name: "Jon Cleary", day: "thursday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Tickets from $45" },
-        { name: "Magoo", day: "thursday", doorTime: "12:30am", showTime: "1:00am", notes: "Tickets $27" },
+        { name: "Jon Cleary and the Absolute Monster Gentlemen", day: "thursday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Tickets from $45" },
+        { name: "Magoo", day: "thursday", doorTime: "12:30am", showTime: "1:00am", notes: "Late Thursday/Early Friday. Tickets $27" },
         { name: "Dan Penn & Spooner Oldham", day: "friday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Tickets from $57" },
-        { name: "Terence Blanchard", day: "saturday", doorTime: "7:00pm", showTime: "8:00pm", notes: "Tickets from $64" }
+        { name: "Shantytown Underground", day: "friday", doorTime: "12:30am", showTime: "1:00am", notes: "w/ special guests. Tickets $32" },
+        { name: "Terence Blanchard", day: "saturday", doorTime: "7:00pm", showTime: "8:00pm", notes: "w/ special guests. Tickets from $64" },
+        { name: "Durand Jones & Friends", day: "saturday", doorTime: "10:00pm", showTime: "10:30pm", notes: "Tickets from $54" },
+        { name: "Papa Mali's Birthday Bash", day: "sunday", doorTime: "10:00pm", showTime: "10:30pm", notes: "w/ Wally Ingram - Music of David Lindley. Tickets $45" }
     ]},
     "Republic New Orleans": { address: "828 South Peters St.", shows: [
-        { name: "Dead Feat", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets $63" },
-        { name: "Earth Wind & Power", day: "friday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets $59" },
-        { name: "STEELY DANth", day: "saturday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Tickets $49" }
+        { name: "Dead Feat", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "Anders Osborne, Fred Tackett, Jackie Greene & more. Tickets $63" },
+        { name: "Earth Wind & Power", day: "friday", doorTime: "9:00pm", showTime: "10:00pm", notes: "The Nth Power w/ Mark Lettieri, Skerik, Kanika Moore & more. Tickets $59" },
+        { name: "STEELY DANth", day: "saturday", doorTime: "9:00pm", showTime: "10:00pm", notes: "The Nth Power w/ Cory Henry, Mark Lettieri, Peter Levin & more. Tickets $49" }
+    ]},
+    "Cafe Istanbul": { address: "2372 St. Claude Ave", shows: [
+        { name: "Wil Blades & Friends", day: "thursday", doorTime: "8:30pm", showTime: "9:00pm", notes: "w/ Donald Harrison Jr., Otis McDonald, Bill Summers. Tickets $40-$50" },
+        { name: "Melvin Seals & JGB", day: "friday", doorTime: "9:00pm", showTime: "9:30pm", notes: "w/ John Kadlecik, special guest Donald Harrison. Tickets from $65" },
+        { name: "Melvin Seals & JGB", day: "saturday", doorTime: "8:30pm", showTime: "9:00pm", notes: "w/ special guest Robert Randolph. Tickets from $65" },
+        { name: "Pimps of Joytime", day: "saturday", doorTime: "1:00am", showTime: "1:30am", notes: "Late night show. Tickets from $40" },
+        { name: "GARAJ MAHAL", day: "sunday", doorTime: "8:30pm", showTime: "9:00pm", notes: "Kai Eckhardt, Fareed Haque, Greg Fundis. Tickets $40-$50" },
+        { name: "Fareed Haque Trio", day: "sunday", doorTime: "11:30pm", showTime: "12:00am", notes: "w/ Herlin Riley, Mark Brooks. Tickets $40-$50" }
+    ]},
+    "House of Blues": { address: "225 Decatur Street", shows: [
+        { name: "Robert Cray Band", day: "friday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $36" },
+        { name: "Gramatik", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets from $42" }
+    ]},
+    "Rock 'n' Bowl": { address: "3000 S. Carrollton Ave", shows: [
+        { name: "Sonny Landreth", day: "friday", doorTime: "", showTime: "8:30pm", notes: "w/ Dale Gaspard. Tickets $30" },
+        { name: "Cowboy Mouth", day: "saturday", doorTime: "", showTime: "8:30pm", notes: "w/ Few Blue. Tickets $30" }
+    ]},
+    "New Orleans Jazz & Blues Market": { address: "1436 Oretha Castle Haley Blvd", shows: [
+        { name: "Sue Foley", day: "thursday", doorTime: "", showTime: "7:30pm", notes: "Tickets from $36" },
+        { name: "Scott Sharrard's Endless Road Live", day: "friday", doorTime: "6:00pm", showTime: "8:00pm", notes: "Tickets from $41" },
+        { name: "Kenny Garrett (Early)", day: "saturday", doorTime: "", showTime: "7:00pm", notes: "Tickets from $25" },
+        { name: "Kenny Garrett (Late)", day: "saturday", doorTime: "", showTime: "9:30pm", notes: "Tickets from $25" }
+    ]},
+    "The Broadside": { address: "600 North Broad St", shows: [
+        { name: "24th Annual Bayou Rendezvous", day: "friday", doorTime: "", showTime: "", notes: "Satisfied Productions Presents" },
+        { name: "Stanton Moore's Festival Finale", day: "sunday", doorTime: "", showTime: "9:00pm", notes: "Stanton Moore Trio + Frequinauts. Tickets $43-$53" }
+    ]},
+    "Howlin' Wolf": { address: "907 S. Peters Street", shows: [
+        { name: "Hot 8 Brass Band", day: "sunday", doorTime: "", showTime: "10:30pm", notes: "Grammy Winning. Tickets $25" }
+    ]},
+    "Howlin' Wolf - The Den": { address: "907 S. Peters Street", shows: [
+        { name: "Marvelous Funkshun", day: "thursday", doorTime: "9:00pm", showTime: "10:00pm", notes: "w/ Jon Gross, Joe Marcinek, Rebekah Todd. Tickets $13-$19" }
+    ]},
+    "Marigny Opera House": { address: "725 Saint Ferdinand St", shows: [
+        { name: "Maggie Koerner & friends", day: "friday", doorTime: "", showTime: "7:30pm", notes: "Tickets from $44" }
+    ]},
+    "Bacchanal": { address: "600 Poland Avenue", shows: [
+        { name: "Willie Green", day: "friday", doorTime: "", showTime: "7:00pm", notes: "" }
+    ]},
+    "Gasa Gasa": { address: "4920 Freret Street", shows: [
+        { name: "Coma Cinema", day: "thursday", doorTime: "8:00pm", showTime: "9:00pm", notes: "w/ Trace Mountains. Tickets $22" }
+    ]},
+    "Santos Bar": { address: "1135 Decatur Street", shows: [
+        { name: "PAST SELF", day: "saturday", doorTime: "9:00pm", showTime: "10:00pm", notes: "w/ Missing and Delores Galore. Tickets $21" }
+    ]},
+    "Siberia": { address: "2227 St. Claude Ave", shows: [
+        { name: "Rotary Downs & Big Light", day: "friday", doorTime: "8:30pm", showTime: "9:00pm", notes: "Tickets $12" }
+    ]},
+    "The Spotted Cat": { address: "623 Frenchmen Street", shows: [
+        { name: "Chris Christy Band", day: "thursday", doorTime: "", showTime: "2:00pm", notes: "" },
+        { name: "Jumbo Shrimp Jazz Band", day: "thursday", doorTime: "", showTime: "10:00pm", notes: "" },
+        { name: "Paradise Jazz Band", day: "friday", doorTime: "", showTime: "2:00pm", notes: "" },
+        { name: "New Orleans Cottonmouth Kings", day: "friday", doorTime: "", showTime: "6:00pm", notes: "" },
+        { name: "James Martin Band", day: "friday", doorTime: "", showTime: "10:00pm", notes: "" },
+        { name: "Jacky Blaire & The Hot Biscuits", day: "sunday", doorTime: "", showTime: "2:00pm", notes: "" },
+        { name: "Treme Brass Band", day: "sunday", doorTime: "", showTime: "6:00pm", notes: "" },
+        { name: "Pat Casey & The New Sound", day: "sunday", doorTime: "", showTime: "9:00pm", notes: "" }
+    ]},
+    "Buffa's Bar & Restaurant": { address: "1001 Esplanade Avenue", shows: [
+        { name: "Some Like It Hot", day: "sunday", doorTime: "", showTime: "11:00am", notes: "Traditional Jazz Brunch" }
     ]}
 };
 
@@ -1287,28 +1473,33 @@ let editingEvent = null, isAddMode = false, selectedLibraryShow = null;
 let currentTab = 'planner', nighttimeFilter = 'all', nighttimeSearch = '';
 let jazzfestFilter = 'all', jazzfestSearch = '';
 
-function loadFromStorage() {
+async function loadFromStorage() {
     try {
-        const saved = localStorage.getItem('gagne-jazz-fest-2026-v3');
+        const saved = await loadFromFirebase();
         if (saved) {
-            const parsed = JSON.parse(saved);
             scheduleData = getDefaultScheduleData();
-            Object.keys(parsed).forEach(dayKey => {
+            Object.keys(saved).forEach(dayKey => {
                 if (scheduleData[dayKey]) {
-                    Object.keys(parsed[dayKey].events).forEach(sectionKey => {
-                        if (parsed[dayKey].events[sectionKey] && Array.isArray(parsed[dayKey].events[sectionKey])) {
-                            scheduleData[dayKey].events[sectionKey] = parsed[dayKey].events[sectionKey];
+                    Object.keys(saved[dayKey].events).forEach(sectionKey => {
+                        if (saved[dayKey].events[sectionKey] && Array.isArray(saved[dayKey].events[sectionKey])) {
+                            scheduleData[dayKey].events[sectionKey] = saved[dayKey].events[sectionKey];
                         }
                     });
                 }
             });
+            console.log('Schedule loaded from Firebase');
         }
-    } catch (error) { console.log('No saved data'); }
+    } catch (error) {
+        console.log('Error loading:', error);
+    }
 }
 
 function saveToStorage() {
-    try { localStorage.setItem('gagne-jazz-fest-2026-v3', JSON.stringify(scheduleData)); }
-    catch (error) { console.error('Error saving:', error); }
+    try {
+        saveToFirebase(scheduleData);
+    } catch (error) {
+        console.error('Error saving:', error);
+    }
 }
 
 function switchTab(tab) {
@@ -1341,8 +1532,7 @@ function isShowInPlanner(showName) {
     for (const dayKey in scheduleData) {
         for (const section in scheduleData[dayKey].events) {
             if (scheduleData[dayKey].events[section].find(e => 
-                e.name.toLowerCase().includes(showName.toLowerCase()) ||
-                showName.toLowerCase().includes(e.name.toLowerCase())
+                e.name.toLowerCase() === showName.toLowerCase()
             )) return true;
         }
     }
@@ -1709,7 +1899,61 @@ document.getElementById('add-from-library-modal').addEventListener('click', e =>
 document.getElementById('nighttime-search').addEventListener('input', e => { nighttimeSearch = e.target.value.toLowerCase(); renderNighttimeLibrary(); });
 document.getElementById('jazzfest-search').addEventListener('input', e => { jazzfestSearch = e.target.value.toLowerCase(); renderJazzFestLibrary(); });
 
-function init() { loadFromStorage(); renderSchedule(); }
+async function init() {
+    await loadFromStorage();
+    renderSchedule();
+    
+    // Setup real-time Firebase listener
+    subscribeToUpdates((newData) => {
+        scheduleData = getDefaultScheduleData();
+        Object.keys(newData).forEach(dayKey => {
+            if (scheduleData[dayKey]) {
+                Object.keys(newData[dayKey].events).forEach(sectionKey => {
+                    if (newData[dayKey].events[sectionKey] && Array.isArray(newData[dayKey].events[sectionKey])) {
+                        scheduleData[dayKey].events[sectionKey] = newData[dayKey].events[sectionKey];
+                    }
+                });
+            }
+        });
+        renderSchedule();
+    });
+    
+    // Display share URL info
+    displayShareInfo();
+}
+
+function displayShareInfo() {
+    const shareUrl = window.location.href;
+    console.log('Share this URL with your group:', shareUrl);
+    
+    // Add a share button to the header
+    const header = document.querySelector('.header');
+    const shareBtn = document.createElement('button');
+    shareBtn.textContent = '🔗 Share Planner';
+    shareBtn.style.cssText = `
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: var(--golden-orange);
+        color: var(--dark);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 0.9rem;
+        z-index: 10;
+    `;
+    shareBtn.onclick = () => {
+        navigator.clipboard.writeText(shareUrl);
+        const oldText = shareBtn.textContent;
+        shareBtn.textContent = '✓ Link Copied!';
+        setTimeout(() => shareBtn.textContent = oldText, 2000);
+    };
+    header.style.position = 'relative';
+    header.appendChild(shareBtn);
+}
+
 init();
     </script>
 </body>
