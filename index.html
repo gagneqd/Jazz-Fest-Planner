@@ -1849,9 +1849,9 @@ function saveEvent() {
         if (!scheduleData[dayKey].events[section]) scheduleData[dayKey].events[section] = [];
         scheduleData[dayKey].events[section].push(eventData);
     }
-    saveToStorage();
-    renderSchedule();
     closeModal();
+    renderSchedule();
+    saveToStorage();
 }
 
 function deleteEvent(dayKey, eventId) {
@@ -2018,10 +2018,10 @@ function confirmLibraryAdd() {
     };
     if (!scheduleData[day].events[section]) scheduleData[day].events[section] = [];
     scheduleData[day].events[section].push(newEvent);
-    saveToStorage();
     closeLibraryModal();
     if (currentTab === 'nighttime') renderNighttimeLibrary();
     else if (currentTab === 'jazzfest') renderJazzFestLibrary();
+    saveToStorage();
 }
 
 document.getElementById('edit-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-modal')) closeModal(); });
