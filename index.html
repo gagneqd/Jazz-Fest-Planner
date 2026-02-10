@@ -1283,7 +1283,7 @@ function getDefaultScheduleData() {
             day: "Wednesday, April 29", subtitle: "Daze Between",
             events: {
                 evening: [
-                    { id: 'wed-1', name: "Grahame Lesh & Friends", venue: "The Joy Theatre", doorTime: "", showTime: "7:30pm", ticketStatus: "none", cardSize: "medium", notes: "ft. Ivan Neville, Jake Brownstein, Cory Henry" },
+                    { id: 'wed-1', name: "Grahame Lesh & Friends", venue: "The Joy Theatre", doorTime: "", showTime: "7:30pm", ticketStatus: "tickets", cardSize: "medium", notes: "ft. Ivan Neville, Jake Brownstein, Cory Henry" },
                     { id: 'wed-2', name: "Daze Between Band", venue: "Tipitina's", doorTime: "", showTime: "10:00pm", ticketStatus: "none", cardSize: "medium", notes: "Eric Krasno, George Porter Jr., Ivan Neville, Oteil Burbridge, Cory Henry, Tony Hall, Raymond Weber, Eric Bloom, Kanika Moore, Ryan Zoidis" }
                 ], postfest: [], latenight: [], other: []
             }
@@ -1296,8 +1296,8 @@ function getDefaultScheduleData() {
                     { id: 'thu-f2', name: "Lake Street Dive", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
                     { id: 'thu-f3', name: "Lettuce", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" }
                 ],
-                postfest: [{ id: 'thu-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "'An Evening With Wilco' - two full sets" }],
-                latenight: [{ id: 'thu-2', name: "Magoo", venue: "Chickie Wah Wah", doorTime: "12:30am", showTime: "1:00am", ticketStatus: "none", cardSize: "medium", notes: "" }],
+                postfest: [{ id: 'thu-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "tickets", cardSize: "medium", notes: "'An Evening With Wilco' - two full sets" }],
+                latenight: [{ id: 'thu-2', name: "Magoo", venue: "Chickie Wah Wah", doorTime: "12:30am", showTime: "1:00am", ticketStatus: "tickets", cardSize: "medium", notes: "" }],
                 other: []
             }
         },
@@ -1311,8 +1311,8 @@ function getDefaultScheduleData() {
                     { id: 'fri-f4', name: "Lainey Wilson", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" },
                     { id: 'fri-f5', name: "California Honeydrops", venue: "Fair Grounds", doorTime: "", showTime: "", ticketStatus: "none", cardSize: "medium", notes: "" }
                 ],
-                postfest: [{ id: 'fri-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "'An Evening With Wilco' - two full sets" }],
-                latenight: [{ id: 'fri-2', name: "Neal Francis", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", cardSize: "medium", notes: "w/ The Breaks (Eddie Roberts, Robert Walter, Stanton Moore)" }],
+                postfest: [{ id: 'fri-1', name: "Wilco", venue: "Saenger Theatre", doorTime: "", showTime: "9:00pm", ticketStatus: "tickets", cardSize: "medium", notes: "'An Evening With Wilco' - two full sets" }],
+                latenight: [],
                 other: []
             }
         },
@@ -1330,9 +1330,10 @@ function getDefaultScheduleData() {
                 ],
                 postfest: [
                     { id: 'sat-1', name: "Anders Osborne Birthday Bash", venue: "Civic Theatre", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "With Dave Malone, Jackie Greene, Lindsay Lou, Rebirth Brass Band" },
-                    { id: 'sat-2', name: "Joe Russo's Almost Dead (JRAD)", venue: "Fillmore New Orleans", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "One night only. Joe Russo, Marco Benevento, Dave Dreiwitz, Tom Hamilton, Scott Metzger" }
+                    { id: 'sat-2', name: "Joe Russo's Almost Dead (JRAD)", venue: "Fillmore New Orleans", doorTime: "8:00pm", showTime: "9:00pm", ticketStatus: "none", cardSize: "medium", notes: "One night only. Joe Russo, Marco Benevento, Dave Dreiwitz, Tom Hamilton, Scott Metzger" },
+                    { id: 'sat-3', name: "The Marcus King Band", venue: "Orpheum Theatre (129 Roosevelt Way)", doorTime: "", showTime: "9:00pm", ticketStatus: "tickets", cardSize: "medium", notes: "Waltz Across Texas" }
                 ],
-                latenight: [{ id: 'sat-3', name: "FiyaPowa", venue: "Tipitina's", doorTime: "1:00am", showTime: "2:00am", ticketStatus: "none", cardSize: "medium", notes: "Members of Dumpstaphunk & Galactic" }],
+                latenight: [],
                 other: []
             }
         },
@@ -1525,55 +1526,36 @@ let jazzfestFilter = 'all', jazzfestSearch = '';
 
 async function loadFromStorage() {
     try {
+        // VERSION FLAG - increment this to force a reset with new default data
+        const DATA_VERSION = 'v4-clean-rebuild';
+        
         const saved = await loadFromFirebase();
-        if (saved) {
+        const savedVersion = saved ? saved.__version : null;
+        
+        if (saved && savedVersion === DATA_VERSION) {
+            // Data is current version - load normally
             scheduleData = getDefaultScheduleData();
             Object.keys(saved).forEach(dayKey => {
-                if (scheduleData[dayKey]) {
-                    Object.keys(saved[dayKey].events).forEach(sectionKey => {
+                if (scheduleData[dayKey] && saved[dayKey]) {
+                    Object.keys(saved[dayKey].events || {}).forEach(sectionKey => {
                         if (saved[dayKey].events[sectionKey] && Array.isArray(saved[dayKey].events[sectionKey])) {
                             scheduleData[dayKey].events[sectionKey] = saved[dayKey].events[sectionKey];
                         }
                     });
                 }
             });
-            
-            // MIGRATION: Fix old show names to match new library names
-            migrateShowNames();
-            
-            console.log('Schedule loaded from Firebase');
+            console.log('Schedule loaded from Firebase (current version)');
+        } else {
+            // No data or outdated version - load clean default and save to Firebase
+            console.log('Loading clean schedule data and saving to Firebase...');
+            scheduleData = getDefaultScheduleData();
+            scheduleData.__version = DATA_VERSION;
+            await saveToFirebase(scheduleData);
+            console.log('Clean schedule saved to Firebase');
         }
     } catch (error) {
-        console.log('Error loading:', error);
-    }
-}
-
-function migrateShowNames() {
-    // Map of old names to new names
-    const nameMigrations = {
-        "Neal Francis": null // Remove this - it's ambiguous now
-    };
-    
-    let migrated = false;
-    Object.keys(scheduleData).forEach(dayKey => {
-        Object.keys(scheduleData[dayKey].events).forEach(sectionKey => {
-            const events = scheduleData[dayKey].events[sectionKey];
-            
-            // Remove shows with old ambiguous names
-            for (let i = events.length - 1; i >= 0; i--) {
-                const event = events[i];
-                if (nameMigrations.hasOwnProperty(event.name)) {
-                    console.log(`Removing obsolete show: ${event.name}`);
-                    events.splice(i, 1);
-                    migrated = true;
-                }
-            }
-        });
-    });
-    
-    if (migrated) {
-        console.log('Migrated old show names');
-        saveToStorage();
+        console.log('Error loading, using defaults:', error);
+        scheduleData = getDefaultScheduleData();
     }
 }
 
