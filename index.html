@@ -184,26 +184,52 @@
         .legend-badge { width: 12px; height: 12px; border-radius: 2px; }
         .legend-badge.tickets { background: var(--vintage-teal); }
         .legend-badge.planning { background: var(--golden-orange); }
+        .legend-badge.maybe { background: rgba(255, 255, 255, 0.4); }
         .legend-badge.none { background: rgba(255, 255, 255, 0.3); }
         .controls {
             background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border);
             border-radius: 15px; padding: 20px; margin-bottom: 25px;
             backdrop-filter: blur(10px);
         }
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px;
+        }
         .search-bar {
             width: 100%;
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(200, 90, 60, 0.3);
             border-radius: 8px;
-            padding: 12px 16px;
+            padding: 12px 40px 12px 16px;
             color: var(--text);
             font-size: 1rem;
-            margin-bottom: 15px;
         }
         .search-bar:focus {
             outline: none;
             border-color: var(--warm-orange);
             box-shadow: 0 0 0 3px rgba(224, 122, 60, 0.2);
+        }
+        .search-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .search-clear:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
         .filters { display: flex; gap: 10px; flex-wrap: wrap; }
         .filter-btn {
@@ -513,6 +539,7 @@
         }
         .card.has-tickets { border-left-color: var(--vintage-teal); }
         .card.planning { border-left-color: var(--golden-orange); }
+        .card.maybe { border-left-color: rgba(255, 255, 255, 0.3); }
         .show-card.in-planner {
             border-left: 4px solid var(--vintage-teal);
             background: rgba(42, 157, 47, 0.1);
@@ -589,6 +616,7 @@
         }
         .card-badge.tickets { background: var(--vintage-teal); color: white; }
         .card-badge.planning { background: var(--golden-orange); color: var(--dark); }
+        .card-badge.maybe { background: rgba(255, 255, 255, 0.2); color: var(--text); }
         .show-day {
             display: inline-block; background: rgba(27, 154, 170, 0.3);
             color: var(--teal); padding: 4px 10px; border-radius: 6px;
@@ -1012,6 +1040,7 @@
             <div class="legend-items">
                 <div class="legend-item"><div class="legend-badge tickets"></div><span>Have Tickets</span></div>
                 <div class="legend-item"><div class="legend-badge planning"></div><span>Planning to Go</span></div>
+                <div class="legend-item"><div class="legend-badge maybe"></div><span>Maybe</span></div>
                 <div class="legend-item"><div class="legend-badge none"></div><span>No Tickets Yet</span></div>
             </div>
         </div>
@@ -1022,7 +1051,10 @@
 
     <div id="nighttime-tab" class="tab-content">
         <div class="controls">
-            <input type="text" id="nighttime-search" class="search-bar" placeholder="Search by artist, venue, or description...">
+            <div class="search-wrapper">
+                <input type="text" id="nighttime-search" class="search-bar" placeholder="Search by artist, venue, or description...">
+                <button class="search-clear" id="nighttime-search-clear" style="display: none;">✕</button>
+            </div>
             <div class="filters" id="nighttime-filters"></div>
         </div>
         <div id="nighttime-container"></div>
@@ -1030,7 +1062,10 @@
 
     <div id="jazzfest-tab" class="tab-content">
         <div class="controls">
-            <input type="text" id="jazzfest-search" class="search-bar" placeholder="Search by artist name...">
+            <div class="search-wrapper">
+                <input type="text" id="jazzfest-search" class="search-bar" placeholder="Search by artist name...">
+                <button class="search-clear" id="jazzfest-search-clear" style="display: none;">✕</button>
+            </div>
             <div class="filters" id="jazzfest-filters"></div>
         </div>
         <div id="jazzfest-container"></div>
@@ -1066,6 +1101,7 @@
                     <option value="none">No tickets yet</option>
                     <option value="tickets">Have tickets</option>
                     <option value="planning">Planning to go</option>
+                    <option value="maybe">Maybe</option>
                 </select>
             </div>
             <div class="form-group"><label>Card Size</label>
@@ -1330,8 +1366,8 @@ const nighttimeLibrary = {
     "Tipitina's": { address: "501 Napoleon Avenue", shows: [
         { name: "The Iceman Special", day: "thursday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $34" },
         { name: "Galactic", day: "friday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets $70" },
-        { name: "Neal Francis", day: "friday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $58" },
-        { name: "Neal Francis", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "w/ The Breaks. Tickets $58" },
+        { name: "Neal Francis (Late Night)", day: "friday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $58" },
+        { name: "Neal Francis (Evening)", day: "saturday", doorTime: "8:00pm", showTime: "9:00pm", notes: "w/ The Breaks. Tickets $58" },
         { name: "FiyaPowa", day: "saturday", doorTime: "1:00am", showTime: "2:00am", notes: "Tickets $42" },
         { name: "Dumpstaphunk", day: "sunday", doorTime: "8:00pm", showTime: "9:00pm", notes: "Tickets $47" }
     ]},
@@ -1565,11 +1601,14 @@ function renderSchedule() {
 }
 
 function renderCard(evt, dayKey, sectionKey) {
-    const statusClass = evt.ticketStatus === 'tickets' ? 'has-tickets' : evt.ticketStatus === 'planning' ? 'planning' : '';
+    const statusClass = evt.ticketStatus === 'tickets' ? 'has-tickets' : 
+                        evt.ticketStatus === 'planning' ? 'planning' : 
+                        evt.ticketStatus === 'maybe' ? 'maybe' : '';
     const sizeClass = evt.cardSize ? `size-${evt.cardSize}` : 'size-medium';
     const sectionClass = sectionKey ? `card-${sectionKey}` : '';
     let badge = evt.ticketStatus === 'tickets' ? '<span class="card-badge tickets">✓ Have Tickets</span>' : 
-                evt.ticketStatus === 'planning' ? '<span class="card-badge planning">Planning to Go</span>' : '';
+                evt.ticketStatus === 'planning' ? '<span class="card-badge planning">Planning to Go</span>' :
+                evt.ticketStatus === 'maybe' ? '<span class="card-badge maybe">Maybe</span>' : '';
     let timeInfo = '';
     if (evt.doorTime && evt.showTime) {
         timeInfo = `<div class="time-group"><div class="card-detail-row">🚪 Doors: ${evt.doorTime}</div><div class="card-detail-row">🕐 Show: ${evt.showTime}</div></div>`;
@@ -1896,8 +1935,36 @@ function confirmLibraryAdd() {
 
 document.getElementById('edit-modal').addEventListener('click', e => { if (e.target === document.getElementById('edit-modal')) closeModal(); });
 document.getElementById('add-from-library-modal').addEventListener('click', e => { if (e.target === document.getElementById('add-from-library-modal')) closeLibraryModal(); });
-document.getElementById('nighttime-search').addEventListener('input', e => { nighttimeSearch = e.target.value.toLowerCase(); renderNighttimeLibrary(); });
-document.getElementById('jazzfest-search').addEventListener('input', e => { jazzfestSearch = e.target.value.toLowerCase(); renderJazzFestLibrary(); });
+
+// Nighttime search with clear button
+const nighttimeSearchInput = document.getElementById('nighttime-search');
+const nighttimeSearchClear = document.getElementById('nighttime-search-clear');
+nighttimeSearchInput.addEventListener('input', e => {
+    nighttimeSearch = e.target.value.toLowerCase();
+    nighttimeSearchClear.style.display = nighttimeSearch ? 'flex' : 'none';
+    renderNighttimeLibrary();
+});
+nighttimeSearchClear.addEventListener('click', () => {
+    nighttimeSearchInput.value = '';
+    nighttimeSearch = '';
+    nighttimeSearchClear.style.display = 'none';
+    renderNighttimeLibrary();
+});
+
+// Jazz fest search with clear button
+const jazzfestSearchInput = document.getElementById('jazzfest-search');
+const jazzfestSearchClear = document.getElementById('jazzfest-search-clear');
+jazzfestSearchInput.addEventListener('input', e => {
+    jazzfestSearch = e.target.value.toLowerCase();
+    jazzfestSearchClear.style.display = jazzfestSearch ? 'flex' : 'none';
+    renderJazzFestLibrary();
+});
+jazzfestSearchClear.addEventListener('click', () => {
+    jazzfestSearchInput.value = '';
+    jazzfestSearch = '';
+    jazzfestSearchClear.style.display = 'none';
+    renderJazzFestLibrary();
+});
 
 async function init() {
     await loadFromStorage();
@@ -1919,39 +1986,6 @@ async function init() {
     });
     
     // Display share URL info
-    displayShareInfo();
-}
-
-function displayShareInfo() {
-    const shareUrl = window.location.href;
-    console.log('Share this URL with your group:', shareUrl);
-    
-    // Add a share button to the header
-    const header = document.querySelector('.header');
-    const shareBtn = document.createElement('button');
-    shareBtn.textContent = '🔗 Share Planner';
-    shareBtn.style.cssText = `
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        background: var(--golden-orange);
-        color: var(--dark);
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: 700;
-        cursor: pointer;
-        font-size: 0.9rem;
-        z-index: 10;
-    `;
-    shareBtn.onclick = () => {
-        navigator.clipboard.writeText(shareUrl);
-        const oldText = shareBtn.textContent;
-        shareBtn.textContent = '✓ Link Copied!';
-        setTimeout(() => shareBtn.textContent = oldText, 2000);
-    };
-    header.style.position = 'relative';
-    header.appendChild(shareBtn);
 }
 
 init();
