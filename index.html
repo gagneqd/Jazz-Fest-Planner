@@ -1526,19 +1526,18 @@ let jazzfestFilter = 'all', jazzfestSearch = '';
 
 async function loadFromStorage() {
     try {
-        // VERSION FLAG - increment this to force a reset with new default data
         const DATA_VERSION = 'v4-clean-rebuild';
         
         const saved = await loadFromFirebase();
         const savedVersion = saved ? saved.__version : null;
         
         if (saved && savedVersion === DATA_VERSION) {
-            // Data is current version - load normally
+            // Data is current version - load it directly
             scheduleData = getDefaultScheduleData();
-            Object.keys(saved).forEach(dayKey => {
-                if (scheduleData[dayKey] && saved[dayKey]) {
+            ['wednesday','thursday','friday','saturday','sunday'].forEach(dayKey => {
+                if (saved[dayKey]) {
                     Object.keys(saved[dayKey].events || {}).forEach(sectionKey => {
-                        if (saved[dayKey].events[sectionKey] && Array.isArray(saved[dayKey].events[sectionKey])) {
+                        if (Array.isArray(saved[dayKey].events[sectionKey])) {
                             scheduleData[dayKey].events[sectionKey] = saved[dayKey].events[sectionKey];
                         }
                     });
@@ -1546,11 +1545,10 @@ async function loadFromStorage() {
             });
             console.log('Schedule loaded from Firebase (current version)');
         } else {
-            // No data or outdated version - load clean default and save to Firebase
-            console.log('Loading clean schedule data and saving to Firebase...');
+            // No data or outdated version - write clean defaults
+            console.log('Writing clean default schedule to Firebase...');
             scheduleData = getDefaultScheduleData();
-            scheduleData.__version = DATA_VERSION;
-            await saveToFirebase(scheduleData);
+            await saveToStorage();
             console.log('Clean schedule saved to Firebase');
         }
     } catch (error) {
@@ -1561,7 +1559,9 @@ async function loadFromStorage() {
 
 function saveToStorage() {
     try {
-        saveToFirebase(scheduleData);
+        // Always include version flag so reload knows data is valid
+        const dataToSave = Object.assign({}, scheduleData, { __version: 'v4-clean-rebuild' });
+        return saveToFirebase(dataToSave);
     } catch (error) {
         console.error('Error saving:', error);
     }
@@ -2062,12 +2062,20 @@ async function init() {
     renderSchedule();
     
     // Setup real-time Firebase listener
+    // Skip the first snapshot (that's just our own data we already loaded)
+    let isFirstSnapshot = true;
     subscribeToUpdates((newData) => {
+        if (isFirstSnapshot) {
+            isFirstSnapshot = false;
+            return; // ignore - we already loaded this in loadFromStorage
+        }
+        // This is a real remote update from another device
+        console.log('Remote update received - syncing...');
         scheduleData = getDefaultScheduleData();
-        Object.keys(newData).forEach(dayKey => {
-            if (scheduleData[dayKey]) {
-                Object.keys(newData[dayKey].events).forEach(sectionKey => {
-                    if (newData[dayKey].events[sectionKey] && Array.isArray(newData[dayKey].events[sectionKey])) {
+        ['wednesday','thursday','friday','saturday','sunday'].forEach(dayKey => {
+            if (newData[dayKey]) {
+                Object.keys(newData[dayKey].events || {}).forEach(sectionKey => {
+                    if (Array.isArray(newData[dayKey].events[sectionKey])) {
                         scheduleData[dayKey].events[sectionKey] = newData[dayKey].events[sectionKey];
                     }
                 });
@@ -2075,8 +2083,6 @@ async function init() {
         });
         renderSchedule();
     });
-    
-    // Display share URL info
 }
 
 init();
