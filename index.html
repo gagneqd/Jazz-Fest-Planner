@@ -1537,10 +1537,43 @@ async function loadFromStorage() {
                     });
                 }
             });
+            
+            // MIGRATION: Fix old show names to match new library names
+            migrateShowNames();
+            
             console.log('Schedule loaded from Firebase');
         }
     } catch (error) {
         console.log('Error loading:', error);
+    }
+}
+
+function migrateShowNames() {
+    // Map of old names to new names
+    const nameMigrations = {
+        "Neal Francis": null // Remove this - it's ambiguous now
+    };
+    
+    let migrated = false;
+    Object.keys(scheduleData).forEach(dayKey => {
+        Object.keys(scheduleData[dayKey].events).forEach(sectionKey => {
+            const events = scheduleData[dayKey].events[sectionKey];
+            
+            // Remove shows with old ambiguous names
+            for (let i = events.length - 1; i >= 0; i--) {
+                const event = events[i];
+                if (nameMigrations.hasOwnProperty(event.name)) {
+                    console.log(`Removing obsolete show: ${event.name}`);
+                    events.splice(i, 1);
+                    migrated = true;
+                }
+            }
+        });
+    });
+    
+    if (migrated) {
+        console.log('Migrated old show names');
+        saveToStorage();
     }
 }
 
