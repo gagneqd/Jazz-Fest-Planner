@@ -223,7 +223,7 @@
             color: var(--text);
             font-size: 1rem;
             cursor: pointer;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
@@ -1053,7 +1053,7 @@
         <div class="controls">
             <div class="search-wrapper">
                 <input type="text" id="nighttime-search" class="search-bar" placeholder="Search by artist, venue, or description...">
-                <button class="search-clear" id="nighttime-search-clear" style="display: none;">✕</button>
+                <button class="search-clear" id="nighttime-search-clear">✕</button>
             </div>
             <div class="filters" id="nighttime-filters"></div>
         </div>
@@ -1064,7 +1064,7 @@
         <div class="controls">
             <div class="search-wrapper">
                 <input type="text" id="jazzfest-search" class="search-bar" placeholder="Search by artist name...">
-                <button class="search-clear" id="jazzfest-search-clear" style="display: none;">✕</button>
+                <button class="search-clear" id="jazzfest-search-clear">✕</button>
             </div>
             <div class="filters" id="jazzfest-filters"></div>
         </div>
@@ -1143,6 +1143,20 @@
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="confirmLibraryAdd()">Add Show</button>
                 <button class="btn btn-secondary" onclick="closeLibraryModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header" id="confirm-title">Confirm</div>
+            <div class="form-group">
+                <p id="confirm-message" style="color: var(--text); line-height: 1.6; margin: 0;"></p>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" id="confirm-yes">Yes</button>
+                <button class="btn btn-secondary" id="confirm-no">No</button>
             </div>
         </div>
     </div>
@@ -1886,16 +1900,47 @@ function closeLibraryModal() {
     selectedLibraryShow = null;
 }
 
-function removeFromPlannerConfirm(showName) {
-    if (confirm(`Remove "${showName}" from your planner?`)) {
+function showConfirm(message, title = 'Confirm') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        const titleEl = document.getElementById('confirm-title');
+        const messageEl = document.getElementById('confirm-message');
+        const yesBtn = document.getElementById('confirm-yes');
+        const noBtn = document.getElementById('confirm-no');
+        
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        modal.classList.add('active');
+        
+        const handleYes = () => {
+            modal.classList.remove('active');
+            yesBtn.removeEventListener('click', handleYes);
+            noBtn.removeEventListener('click', handleNo);
+            resolve(true);
+        };
+        
+        const handleNo = () => {
+            modal.classList.remove('active');
+            yesBtn.removeEventListener('click', handleYes);
+            noBtn.removeEventListener('click', handleNo);
+            resolve(false);
+        };
+        
+        yesBtn.addEventListener('click', handleYes);
+        noBtn.addEventListener('click', handleNo);
+    });
+}
+
+async function removeFromPlannerConfirm(showName) {
+    const confirmed = await showConfirm(`Remove "${showName}" from your planner?`, 'Remove Show');
+    if (confirmed) {
         // Find and remove the show from all days/sections
         let removed = false;
         Object.keys(scheduleData).forEach(dayKey => {
             Object.keys(scheduleData[dayKey].events).forEach(sectionKey => {
                 const events = scheduleData[dayKey].events[sectionKey];
                 const index = events.findIndex(e => 
-                    e.name.toLowerCase().includes(showName.toLowerCase()) ||
-                    showName.toLowerCase().includes(e.name.toLowerCase())
+                    e.name.toLowerCase() === showName.toLowerCase()
                 );
                 if (index !== -1) {
                     events.splice(index, 1);
